@@ -1,5 +1,7 @@
 # Pitchy-AI
 
+Helping you make your pitch, less pitchy!
+
 ## Description
 
 Pitchy-AI is a web-based application that encourages users to record their pitches, presentations, speeches as either as live audio recordings or typed text to receive AI-driven analysis, performance metrics, and an optional improved rewrite. The platform integrates Google Gemini for language understanding and pitch evaluation, and ElevenLabs for high-quality AI voice synthesis, allowing users to hear their pitch back in both its original and improved forms their tone.
