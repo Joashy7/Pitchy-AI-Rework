@@ -16,4 +16,4 @@ Pitchy-AI is a web-based application that encourages users to record their pitch
 
 </p>
 
-<img src="public/images/LandingPage-Mockup.png>
+<img src="client/public/images/LandingPage-Mockup.png">
