@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import LandingPage from "./pages/landingpage";
+import LoginPage from "./pages/login";
 import NewPitch from "./pages/new-pitch";
 import Analysis from "./pages/analysis";
 import Dashboard from "./pages/dashboard";
@@ -10,6 +11,7 @@ function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/landing" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/new-pitch" element={<NewPitch />} />
       <Route path="/analysis" element={<Analysis />} />
       <Route path="/dashboard" element={<Dashboard />} />
