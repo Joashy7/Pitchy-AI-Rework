@@ -29,13 +29,15 @@ export default function LandingPage() {
             </a>
           </div>
 
-          {/* CTA */}
-          <Link
-            to="/new-pitch"
-            className="btn-primary-br text-on-primary-container px-6 py-2.5 rounded-xl font-headline text-sm font-bold tracking-wide hover:opacity-80 transition-all duration-300 active:scale-95"
-          >
-            Start Pitching
-          </Link>
+          {/* Auth Buttons */}
+          <div className="hidden md:flex gap-4 items-center">
+            <Link
+              to="/login"
+              className="btn-primary-br text-on-primary-container px-6 py-2.5 rounded-xl font-headline text-sm font-bold tracking-wide hover:opacity-80 transition-all duration-300 active:scale-95"
+            >
+              Start Pitching
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -200,6 +202,59 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+        {/* Login Section */}
+        <section id="login" className="py-40 px-6 relative">
+          <div className="max-w-md mx-auto glass-panel p-12 rounded-lg border border-outline-variant/20 relative overflow-hidden">
+            <div className="cta-glow" />
+
+            <h2 className="text-3xl font-headline font-black mb-2 text-on-surface text-center">Welcome Back</h2>
+            <p className="text-on-surface-variant text-center mb-8">Login to your Pitchy-AI account</p>
+
+            <form className="space-y-6 relative z-10">
+              <div>
+                <label className="block text-sm font-semibold text-on-surface mb-2">Email Address</label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  className="w-full px-4 py-3 rounded-lg bg-surface-container border border-outline-variant/20 text-on-surface placeholder-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-on-surface mb-2">Password</label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-lg bg-surface-container border border-outline-variant/20 text-on-surface placeholder-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="w-4 h-4 rounded" />
+                  <span className="text-sm text-on-surface-variant">Remember me</span>
+                </label>
+                <a href="#" className="text-sm text-primary hover:text-primary-fixed transition-colors">Forgot?</a>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 btn-primary text-on-primary-container rounded-lg font-bold font-headline hover:opacity-90 transition-all active:scale-95"
+              >
+                Sign In
+              </button>
+
+              <div className="text-center pt-4 border-t border-outline-variant/10">
+                <p className="text-on-surface-variant text-sm">
+                  Don't have an account?{' '}
+                  <Link to="/new-pitch" className="text-primary hover:text-primary-fixed font-semibold transition-colors">
+                    Sign Up
+                  </Link>
+                </p>
+              </div>
+            </form>
           </div>
         </section>
       </main>
