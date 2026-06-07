@@ -1,159 +1,37 @@
-import express from "express"; // Express
-import multer from "multer"; // For File Uploading in Express
-import cors from "cors"; // Cross Origin Resource Sharing, allows frontend to talk to backend
-import dotenv from "dotenv"; //loads env file
-import fetch from "node-fetch"; 
-import FormData from "form-data";
-import { GoogleGenerativeAI } from "@google/generative-ai"; //Initialize Gemini AI Client
+import express from "express";
+import multer from "multer";
+import cors from "cors";
+import dotenv from "dotenv";
+import fetch from "node-fetch";
+
+import * as engine from "./engine.js";
+import * as storage from "./storage.js";
 
 dotenv.config();
 
 const app = express();
-const upload = multer({ storage: multer.memoryStorage() }); //File upload using express, keeps the file in RAM
+const upload = multer({ storage: multer.memoryStorage() });
 
-app.use(cors());    // tells the server to accept request from frontend
-app.use(express.json()); //server reads JSON data in requests
+app.use(cors());
+app.use(express.json());
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-//Test Route
-app.get("/", (req, res) => {
-  res.send("Server is working");
-});
-
-//Testing ElevenLabs
-async function transcribeWithElevenLabs(file) {
-  let lastError;
-
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      console.log(`ELEVENLABS STT ATTEMPT ${attempt}`);
-
-      const formData = new FormData();
-      formData.append("file", file.buffer, {
-        filename: file.originalname || "recording.webm",
-        contentType: file.mimetype || "audio/webm"
-      });
-      formData.append("model_id", "scribe_v2");
-
-      // ElevenLabs Format
-      const response = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
-        method: "POST",
-        headers: {
-          "xi-api-key": process.env.ELEVEN_API_KEY,
-          ...formData.getHeaders()
-        },
-        body: formData
-      });
-
-      // Send audio file to Eleven Labs, wait until get response
-      const rawText = await response.text();
-      let data;
-
-      
-      try {
-        data = JSON.parse(rawText);
-      } catch {
-        data = { raw: rawText };
-      }
-
-      console.log("ElevenLabs response:", data);
-     // get response and convert to js object
-      if (!response.ok) {
-        throw new Error(
-          data.detail ||
-          data.message ||
-          data.raw ||
-          `Speech-to-text failed with status ${response.status}`
-        );
-      }
-
-      return data;
-    } catch (error) {
-      lastError = error;
-      console.error(`ElevenLabs STT attempt ${attempt} failed:`, error.message);
-
-      if (attempt < 3) {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-      }
-    }
-  }
-
-  throw lastError;
-}
-
-async function analyzeWithGemini(transcript, durationSeconds) {
-  console.log("GEMINI ANALYSIS STARTED");
-
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-//AI PROMPTING
-  const prompt = `
-You are an expert pitch coach.
-
-Analyze this spoken pitch transcript and return ONLY valid JSON.
-Do not include markdown.
-Do not include code fences.
-Do not include any explanation outside the JSON.
-
-Return EXACTLY this shape:
-{
-  "clarity": 0,
-  "persuasiveness": 0,
-  "confidence": 0,
-  "narrative_flow": 0,
-  "overall_score": 0,
-  "summary_feedback": "",
-  "strong_points": [
-    {
-      "timestamp": "",
-      "quote": "",
-      "explanation": ""
-    }
-  ],
-  "needs_focus": [
-    {
-      "timestamp": "",
-      "quote": "",
-      "explanation": ""
-    }
-  ],
-  "duration": ""
-}
-
-Rules:
-- Scores must be integers from 0 to 100.
-- strong_points must have 1 or 2 items.
-- needs_focus must have 1 or 2 items.
-- duration must match the total speech length as mm:ss.
-- Base the analysis only on the transcript content.
-- Keep explanations concise and useful.
-- Use estimated timestamps if needed.
-
-Total speech duration in seconds: ${durationSeconds}
-
-Transcript:
-${transcript}
-`;
-
-  const result = await model.generateContent(prompt);
-  const text = result.response.text().trim();
-
-  console.log("RAW GEMINI RESPONSE:");
-  console.log(text);
-
-  const cleaned = text
-    .replace(/```json/gi, "")
-    .replace(/```/g, "")
-    .trim();
-
+// Initialize Google Sheets API on startup
+const initializeStorage = async () => {
   try {
-    return JSON.parse(cleaned);
-  } catch (parseError) {
-    console.error("GEMINI JSON PARSE ERROR:", parseError);
-    console.error("CLEANED GEMINI TEXT:", cleaned);
-    throw new Error("Gemini returned invalid JSON");
+    await storage.initializeAuth();
+    console.log("✓ Storage system initialized successfully");
+  } catch (error) {
+    console.error("✗ Failed to initialize storage system:", error.message);
+    process.exit(1);
   }
-}
+};
+
+// Initialize before starting server
+await initializeStorage();
+
+app.get("/", (req, res) => {
+  res.send("Pitchy AI Server is running");
+});
 
 app.post("/analyze", upload.single("file"), async (req, res) => {
   try {
@@ -163,20 +41,44 @@ app.post("/analyze", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "No audio file uploaded" });
     }
 
-    const sttData = await transcribeWithElevenLabs(req.file);
+    // Step 1: Transcribe audio
+    const sttData = await engine.transcribeWithElevenLabs(req.file);
     const transcript = sttData.text || "No transcript returned";
 
-    console.log("TRANSCRIPT READY FOR GEMINI:");
+    console.log("TRANSCRIPT READY FOR ANALYSIS:");
     console.log(transcript);
 
-    const analysis = await analyzeWithGemini(
+    // Step 2: Analyze with Gemini
+    const analysis = await engine.analyzeWithGemini(
       transcript,
       sttData.audio_duration_secs || 0
     );
 
+    // Step 3: Generate improvement suggestions
+    const improvementSuggestions = engine.generateImprovementSuggestions(analysis);
+
+    // Step 4: Save to storage (Google Sheets)
+    const pitchData = {
+      user_name: "",
+      password: "",
+      transcribed_pitch: transcript,
+      editted_pitch: "",
+      analysis_score: analysis.overall_score,
+      improvement_suggestion_text: analysis.summary_feedback,
+      clarity_score: analysis.clarity,
+      persuasiveness_score: analysis.persuasiveness,
+      confidence_score: analysis.confidence,
+      narrative_flow_score: analysis.narrative_flow,
+    };
+
+    const storageResult = await storage.savePitch(pitchData);
+    console.log("Storage result:", storageResult);
+
     return res.json({
       transcript,
-      ...analysis
+      ...analysis,
+      improvementSuggestions,
+      storageResult,
     });
   } catch (error) {
     console.error("Analyze error:", error);
@@ -225,6 +127,53 @@ app.post("/generate-pitch-audio", async (req, res) => {
   } catch (error) {
     console.error("TTS route error:", error);
     return res.status(500).json({ error: "Failed to generate pitch audio" });
+  }
+});
+
+app.post("/improve-pitch", async (req, res) => {
+  try {
+    const { transcript, analysis } = req.body;
+
+    if (!transcript || !analysis) {
+      return res.status(400).json({ error: "Transcript and analysis are required" });
+    }
+
+    console.log("IMPROVE PITCH ROUTE HIT");
+
+    const improvedPitch = await engine.generateImprovedPitch(transcript, analysis);
+
+    return res.json({
+      improvedPitch
+    });
+  } catch (error) {
+    console.error("Improve pitch error:", error);
+    return res.status(500).json({
+      error: error.message || "Failed to generate improved pitch"
+    });
+  }
+});
+
+app.post("/save-improved-pitch", async (req, res) => {
+  try {
+    const { pitchId, improvedPitch } = req.body;
+
+    if (!pitchId || !improvedPitch) {
+      return res.status(400).json({ error: "pitchId and improvedPitch are required" });
+    }
+
+    console.log("SAVE IMPROVED PITCH ROUTE HIT");
+
+    const result = await storage.updateEditedPitch(pitchId, improvedPitch);
+
+    return res.json({
+      success: result.success,
+      message: result.success ? "Improved pitch saved" : result.error
+    });
+  } catch (error) {
+    console.error("Save improved pitch error:", error);
+    return res.status(500).json({
+      error: error.message || "Failed to save improved pitch"
+    });
   }
 });
 
