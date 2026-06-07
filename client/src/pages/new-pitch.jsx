@@ -1,6 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
+import { useMicrophone } from "../hooks/useMicrophone";
 
 function NewPitch() {
+  const {
+    isRecording,
+    timeElapsed,
+    isAnalyzing,
+    formatTime,
+    startRecording,
+    stopRecording,
+    canvasRef,
+  } = useMicrophone();
+
+  const [scriptText, setScriptText] = useState("");
+  const [wordCount, setWordCount] = useState(0);
+
+  const handleScriptChange = (e) => {
+    const text = e.target.value;
+    setScriptText(text);
+    setWordCount(text.trim().split(/\s+/).filter(Boolean).length);
+  };
+
+  const estimateTime = () => {
+    const avgWpm = 130;
+    const minutes = Math.ceil(wordCount / avgWpm);
+    const secs = ((wordCount / avgWpm) * 60) % 60;
+    return `${minutes}:${Math.floor(secs)
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
   return (
     <div className="dark">
       {/* Sidebar */}
@@ -129,12 +158,14 @@ function NewPitch() {
                 <div className="recording-card__shine"></div>
 
                 <div className="recording-card__body">
-                  <div id="recordingTimer" className="recording-timer hidden">
+                  <div
+                    className={`recording-timer ${!isRecording ? "hidden" : ""}`}
+                  >
                     <span className="recording-timer__dot"></span>
-                    <span id="recordingTimerDisplay">00:00</span>
+                    <span>{formatTime(timeElapsed)}</span>
                   </div>
 
-                  <div id="waveformStatic" className="waveform">
+                  <div id="waveformStatic" className={`waveform ${isRecording ? "hidden" : ""}`}>
                     {[40, 60, 80, 100, 70, 90, 50, 30, 80, 45, 25].map(
                       (height, index) => (
                         <div
@@ -150,9 +181,10 @@ function NewPitch() {
                   </div>
 
                   <canvas
-                    id="waveformLive"
-                    className="hidden"
+                    ref={canvasRef}
+                    className={isRecording ? "" : "hidden"}
                     aria-hidden="true"
+                    style={{ width: "100%", height: "120px" }}
                   ></canvas>
 
                   <div className="controls">
@@ -167,7 +199,8 @@ function NewPitch() {
 
                     <button
                       type="button"
-                      id="recordBtn"
+                      onClick={startRecording}
+                      disabled={isRecording || isAnalyzing}
                       className="ctrl-btn ctrl-btn--primary"
                       aria-label="Start recording"
                     >
@@ -181,7 +214,8 @@ function NewPitch() {
 
                     <button
                       type="button"
-                      id="stopBtn"
+                      onClick={stopRecording}
+                      disabled={!isRecording || isAnalyzing}
                       className="ctrl-btn ctrl-btn--secondary ctrl-btn--secondary--danger"
                       aria-label="Stop recording"
                     >
@@ -191,8 +225,12 @@ function NewPitch() {
                     </button>
                   </div>
 
-                  <p id="recordingHint" className="recording-card__hint">
-                    Click mic to start recording
+                  <p className="recording-card__hint">
+                    {isAnalyzing
+                      ? "Analyzing pitch with AI... Please wait."
+                      : isRecording
+                      ? "Recording… click stop when finished"
+                      : "Click mic to start recording"}
                   </p>
                 </div>
               </div>
@@ -202,14 +240,16 @@ function NewPitch() {
                   <h3 className="script-card__title">Pitch Script</h3>
 
                   <div className="script-card__meta">
-                    <span className="meta-pill">Word Count: 142</span>
-                    <span className="meta-pill">Est. Time: 1:15</span>
+                    <span className="meta-pill">Word Count: {wordCount}</span>
+                    <span className="meta-pill">Est. Time: {estimateTime()}</span>
                   </div>
                 </div>
 
                 <textarea
                   className="script-textarea"
                   placeholder="Start typing your pitch here…"
+                  value={scriptText}
+                  onChange={handleScriptChange}
                 ></textarea>
 
                 <div className="script-card__actions">
