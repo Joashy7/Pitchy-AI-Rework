@@ -55,7 +55,6 @@ export default {
         "on-primary":                  "#003063",
         "inverse-on-surface":          "#2f3133",
         "tertiary-fixed-dim":          "#ffb691",
-        "on-primary-fixed":            "#001b3d",
       },
       borderRadius: {
         DEFAULT: "1rem",

@@ -1,28 +1,53 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AppShell from "../components/layout/AppShell";
+
+const readStoredAnalysis = () => {
+  const raw = localStorage.getItem("pitchPalResults");
+
+  if (!raw) {
+    return {
+      data: null,
+      error: "No analysis data found. Please record a pitch first.",
+    };
+  }
+
+  try {
+    return {
+      data: JSON.parse(raw),
+      error: "",
+    };
+  } catch (error) {
+    console.error("Failed to parse analysis data:", error);
+    return {
+      data: null,
+      error: "Error loading analysis data",
+    };
+  }
+};
+
+const getSafeScore = (value) => {
+  const score = Number(value);
+  if (!Number.isFinite(score)) return 0;
+
+  return Math.min(100, Math.max(0, Math.round(score)));
+};
+
+const getFeedbackItems = (items) => (Array.isArray(items) ? items : []);
 
 function Analysis() {
   const navigate = useNavigate();
-  const [data, setData] = useState(null);
+  const [storedAnalysis] = useState(readStoredAnalysis);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [isGeneratingImprovedAudio, setIsGeneratingImprovedAudio] = useState(false);
+  const data = storedAnalysis.data;
 
   useEffect(() => {
-    const raw = localStorage.getItem("pitchPalResults");
-    if (!raw) {
-      alert("No analysis data found. Please record a pitch first.");
-      navigate("/new-pitch");
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(raw);
-      setData(parsed);
-    } catch (error) {
-      console.error("Failed to parse analysis data:", error);
-      alert("Error loading analysis data");
+    if (storedAnalysis.error) {
+      alert(storedAnalysis.error);
       navigate("/new-pitch");
     }
-  }, [navigate]);
+  }, [navigate, storedAnalysis.error]);
 
   const handleHearPitch = async () => {
     if (!data?.transcript) return;
@@ -54,131 +79,58 @@ function Analysis() {
     }
   };
 
+  const handleHearImprovedPitch = async () => {
+    const improvedPitch = data?.improvedPitch || data?.improved_transcript;
+    if (!improvedPitch) return;
+
+    setIsGeneratingImprovedAudio(true);
+    try {
+      const res = await fetch("http://localhost:3000/generate-pitch-audio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript: improvedPitch }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        alert(result.error || "Failed to generate audio");
+        return;
+      }
+
+      if (result.audioUrl) {
+        const audio = new Audio(result.audioUrl);
+        audio.play();
+      }
+    } catch (error) {
+      console.error("TTS error:", error);
+      alert("Could not generate improved pitch audio");
+    } finally {
+      setIsGeneratingImprovedAudio(false);
+    }
+  };
+
   if (!data) {
     return <div>Loading...</div>;
   }
 
   const transcript = data.transcript || "No transcript available.";
-  const clarity = Number(data.clarity || 0);
-  const persuasiveness = Number(data.persuasiveness || 0);
-  const confidence = Number(data.confidence || 0);
-  const narrativeFlow = Number(data.narrative_flow || 0);
-  const overall = Number(data.overall_score || 0);
+  const improvedPitch = data.improvedPitch || data.improved_transcript || "";
+  const clarity = getSafeScore(data.clarity);
+  const persuasiveness = getSafeScore(data.persuasiveness);
+  const confidence = getSafeScore(data.confidence);
+  const narrativeFlow = getSafeScore(data.narrative_flow);
+  const overall = getSafeScore(data.overall_score);
   const summaryFeedback = data.summary_feedback || data.feedback || "No summary available.";
-  const strongPoints = Array.isArray(data.strong_points) ? data.strong_points : [];
-  const needsFocus = Array.isArray(data.needs_focus) ? data.needs_focus : [];
+  const strongPoints = getFeedbackItems(data.strong_points);
+  const needsFocus = getFeedbackItems(data.needs_focus);
 
   const circumference = 282.7;
   const strokeDashoffset = circumference - (overall / 100) * circumference;
 
   return (
-    <div className="dark">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div style={{ padding: "var(--space-8)" }}>
-          <div className="sidebar__brand">
-            <div className="sidebar__logo">
-              <span
-                className="material-symbols-outlined text-white"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                rocket_launch
-              </span>
-            </div>
-
-            <div>
-              <p className="sidebar__app-name">Pitchy-AI</p>
-              <p className="sidebar__app-tagline">Your Pitch. Perfected.</p>
-            </div>
-          </div>
-
-          <nav className="sidebar__nav">
-            <a href="/landing" className="sidebar__nav-link">
-              <span className="material-symbols-outlined">home</span>
-              Home
-            </a>
-
-            <a href="/dashboard" className="sidebar__nav-link">
-              <span className="material-symbols-outlined">dashboard</span>
-              Dashboard
-            </a>
-
-            <a href="/analysis" className="sidebar__nav-link">
-              <span className="material-symbols-outlined">psychology</span>
-              AI Feedback
-            </a>
-
-            <a href="#" className="sidebar__nav-link">
-              <span className="material-symbols-outlined">settings_suggest</span>
-              Settings
-            </a>
-          </nav>
-        </div>
-
-        <div className="sidebar__footer">
-          <div className="upgrade-card">
-            <p className="upgrade-card__label">Upgrade to Pro</p>
-            <p className="upgrade-card__body">Unlock advanced neural analysis</p>
-            <button className="upgrade-card__btn">Get Started</button>
-          </div>
-
-          <nav className="sidebar__footer-nav">
-            <a href="#" className="sidebar__footer-link">
-              <span className="material-symbols-outlined">help</span>
-              Help Center
-            </a>
-
-            <a href="#" className="sidebar__footer-link">
-              <span className="material-symbols-outlined">logout</span>
-              Logout
-            </a>
-          </nav>
-        </div>
-      </aside>
-
-      {/* Main Body */}
-      <main className="main-canvas">
-        <header className="bg-[#121416]/60 backdrop-blur-xl border-b border-[#414754]/15 h-16 sticky top-0 z-40 flex justify-between items-center px-8 max-w-[1920px] mx-auto">
-          <div className="flex items-center gap-8">
-            <div className="relative hidden md:block">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                search
-              </span>
-
-              <input
-                className="bg-surface-container-lowest border-none rounded-full py-1.5 pl-10 pr-4 text-xs text-on-surface focus:ring-1 focus:ring-primary w-64 placeholder:text-slate-600"
-                placeholder="Search pitches..."
-                type="text"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button className="pitch-gradient text-on-primary-fixed font-headline font-bold text-sm px-6 py-2 rounded-full active:scale-95 transition-all shadow-lg shadow-primary/20">
-              <a href="/new-pitch">New Pitch</a>
-            </button>
-
-            <div className="flex items-center gap-2 border-l border-outline-variant/30 pl-4">
-              <button className="p-2 text-slate-400 hover:text-white transition-colors">
-                <span className="material-symbols-outlined">notifications</span>
-              </button>
-
-              <button className="p-2 text-slate-400 hover:text-white transition-colors">
-                <span className="material-symbols-outlined">settings</span>
-              </button>
-
-              <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/30">
-                <img
-                  alt="User profile"
-                  className="w-full h-full object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEEkbMJ1oKR7lOHtujcFiuIzNc3K1uVHXipnX4-Rmtd2IXcQ0PrXPdhTjvL6zX0QvoJ64XX_0TiH-xL8XmiuCr5wooUWjk31OoG6C2n714SEQs-JR_F53Q2jZGPNlp7LISbArZLZZ5qGMTsFhaE1NX7EeScxjResy2KGnHpbMMSwgKZwH7gnWqSe0ZSlIDj3kLAvPajb2VZJie9zp8y5ud-GXDXFbyt_2rz7oPywnrlvbBvh8OeDHDuIB0k1ClJnbAWqBBi1TjVmo"
-                />
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <section className="page-section">
+    <AppShell>
+      <section className="page-section">
           <div className="page-header">
             <h2 className="page-header__title">Your Pitch Analysis</h2>
 
@@ -473,9 +425,54 @@ function Analysis() {
               ))}
             </div>
           </div>
-        </section>
-      </main>
-    </div>
+
+          {/* Improved Pitch Section */}
+          <div className="card card--padded-lg" style={{ marginBottom: "2rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+              <h3 style={{ fontSize: "1.2rem", fontWeight: "600" }}>Your Improved Pitch</h3>
+              <button
+                onClick={handleHearImprovedPitch}
+                disabled={isGeneratingImprovedAudio || !improvedPitch}
+                style={{
+                  padding: "0.5rem 1rem",
+                  background: "var(--color-primary)",
+                  color: "var(--color-on-primary)",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: improvedPitch ? "pointer" : "not-allowed",
+                  fontSize: "0.9rem",
+                  opacity: isGeneratingImprovedAudio || !improvedPitch ? 0.6 : 1,
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ marginRight: "0.5rem", verticalAlign: "middle" }}>
+                  {isGeneratingImprovedAudio ? "hourglass_top" : "volume_up"}
+                </span>
+                {isGeneratingImprovedAudio ? "Generating..." : "Hear Improved Pitch"}
+              </button>
+            </div>
+
+            <div>
+              <p style={{ marginBottom: "1.5rem", lineHeight: "1.6", color: "var(--color-on-surface)" }}>
+                <span
+                  style={{
+                    display: "inline-block",
+                    background: "rgba(76, 175, 80, 0.2)",
+                    padding: "0.25rem 0.75rem",
+                    borderRadius: "4px",
+                    marginRight: "0.75rem",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                    color: "rgb(129, 219, 126)",
+                  }}
+                >
+                  IMPROVED PITCH
+                </span>
+                "{improvedPitch || "No improved pitch available."}"
+              </p>
+            </div>
+          </div>
+      </section>
+    </AppShell>
   );
 }
 
