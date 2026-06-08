@@ -1,5 +1,22 @@
 const WAVEFORM_BAR_HEIGHTS = [40, 60, 80, 100, 70, 90, 50, 30, 80, 45, 25];
 
+/**
+ * Renders microphone recording controls, waveform, timer, and analysis status.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {boolean} props.isRecording - Whether microphone recording is active.
+ * @param {number} props.timeElapsed - Recording elapsed time in seconds.
+ * @param {boolean} props.isAnalyzing - Whether audio analysis is in progress.
+ * @param {boolean} props.isTextAnalyzing - Whether text analysis is in progress.
+ * @param {Function} props.formatTime - Formats elapsed seconds for display.
+ * @param {Function} props.startRecording - Starts microphone recording.
+ * @param {Function} props.stopRecording - Stops microphone recording.
+ * @param {object} props.canvasRef - Canvas ref used by waveform visualization.
+ *
+ * Returns:
+ * @returns {JSX.Element} Recording panel with start and stop controls.
+ */
 export default function RecordingPanel({
   isRecording,
   timeElapsed,

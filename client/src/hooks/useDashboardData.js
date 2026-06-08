@@ -30,6 +30,15 @@ const buildDashboardQuery = () => {
   return queryParams;
 };
 
+/**
+ * Loads and exposes dashboard pitch history and aggregate stats.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {object} Dashboard state with pitchData, dashboardStats, isLoading, and error.
+ */
 export const useDashboardData = () => {
   const [pitchData, setPitchData] = useState([]);
   const [dashboardStats, setDashboardStats] = useState(DEFAULT_DASHBOARD_STATS);

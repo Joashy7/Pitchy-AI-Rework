@@ -12,6 +12,15 @@ globalThis.loggedClientTest("getSafeScore - clamps invalid values", LOCATION, as
   assert.equal(getSafeScore("not-a-score"), 0);
 });
 
+globalThis.loggedClientTest("getFeedbackItems - array fallback", LOCATION, async () => {
+  const { getFeedbackItems } = await globalThis.loadClientModule("/src/utils/analysisViewModel.js");
+  const items = [{ quote: "Strong opening." }];
+
+  assert.equal(getFeedbackItems(items), items);
+  assert.deepEqual(getFeedbackItems(null), []);
+  assert.deepEqual(getFeedbackItems({ quote: "Not an array." }), []);
+});
+
 globalThis.loggedClientTest("toAnalysisViewModel - text-only analysis", LOCATION, async () => {
   const { toAnalysisViewModel } = await globalThis.loadClientModule("/src/utils/analysisViewModel.js");
   const viewModel = toAnalysisViewModel({

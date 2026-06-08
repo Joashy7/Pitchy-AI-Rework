@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -104,6 +104,27 @@ loggedTest('createLocalSheetsClient - persists rows', LOCATION, async () => {
   });
 });
 
+loggedTest('createLocalSheetsClient - corrupted store recovery', LOCATION, async () => {
+  await withTempStoragePath(async (storagePath) => {
+    const logs = [];
+    const client = createLocalSheetsClient({
+      logger: {
+        logInfo: (...args) => logs.push(args),
+      },
+      storagePath,
+    });
+
+    await writeFile(storagePath, '{bad json', 'utf8');
+    await client.initializeAuth();
+    await client.ensureSheet('local', USERS_SHEET_NAME, USER_HEADERS);
+
+    const rows = await client.getSheetValues('local', `${USERS_SHEET_NAME}!A:E`);
+
+    assert.deepEqual(rows, [USER_HEADERS]);
+    assert.match(logs[0][0], /was malformed; resetting it/);
+  });
+});
+
 loggedTest('createSheetsClientForMode - local mode selection', FACADE_LOCATION, async () => {
   await withTempStoragePath(async (storagePath) => {
     const client = createSheetsClientForMode({
@@ -114,11 +135,17 @@ loggedTest('createSheetsClientForMode - local mode selection', FACADE_LOCATION, 
 
     await client.initializeAuth();
 
-    assert.equal(isLocalStorageMode({ STORAGE_MODE: 'mock' }), true);
-    assert.equal(isLocalStorageMode({ STORAGE_MODE: 'demo' }), true);
-    assert.equal(isLocalStorageMode({ STORAGE_MODE: 'google' }), false);
     assert.equal(client.getSpreadsheetId(), 'local-demo-spreadsheet');
   });
+});
+
+loggedTest('isLocalStorageMode - demo mode detection', FACADE_LOCATION, () => {
+  assert.equal(isLocalStorageMode({ STORAGE_MODE: 'mock' }), true);
+  assert.equal(isLocalStorageMode({ STORAGE_MODE: 'demo' }), true);
+  assert.equal(isLocalStorageMode({ STORAGE_MODE: ' LOCAL ' }), true);
+  assert.equal(isLocalStorageMode({ STORAGE_MODE: 'google' }), false);
+  assert.equal(isLocalStorageMode({ STORAGE_MODE: '' }), false);
+  assert.equal(isLocalStorageMode({}), false);
 });
 
 loggedTest('getStorageMode - env fallback and normalization', FACADE_LOCATION, () => {

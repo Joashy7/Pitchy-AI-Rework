@@ -66,6 +66,15 @@ const STATS = [
   { value: "4.9/5", label: "Founder Rating" },
 ];
 
+/**
+ * Renders the marketing landing page for Pitchy-AI.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {JSX.Element} Landing page with hero, features, workflow, and calls to action.
+ */
 function LandingPage() {
   return (
     <div className="bg-background text-on-background font-body">

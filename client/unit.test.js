@@ -30,9 +30,16 @@ globalThis.loggedClientTest = (functionName, location, runTest) => {
 
 try {
   await import("./src/tests/auth.test.js");
+  await import("./src/tests/analysisResults.test.js");
   await import("./src/tests/analysisViewModel.test.js");
   await import("./src/tests/dashboardViewModel.test.js");
   await import("./src/tests/analysisComponents.test.js");
+  await import("./src/tests/componentCoverage.test.js");
+  await import("./src/tests/frontendHelpers.test.js");
+  await import("./src/tests/hooksSmoke.test.js");
+  await import("./src/tests/interactionPolish.test.js");
+  await import("./src/tests/microphoneHelpers.test.js");
+  await import("./src/tests/pageSmoke.test.js");
   await import("./src/tests/api.test.js");
   await runLoggedTests();
 } finally {

@@ -4,6 +4,19 @@ const BAR_COUNT = 48;
 const BAR_GAP_PX = 4;
 const MIN_BAR_HEIGHT_PX = 4;
 
+/**
+ * Draws a waveform bar using rounded rectangles when available.
+ *
+ * Args:
+ * @param {CanvasRenderingContext2D} ctx - Canvas rendering context.
+ * @param {number} x - Left position of the bar.
+ * @param {number} y - Top position of the bar.
+ * @param {number} width - Bar width in pixels.
+ * @param {number} height - Bar height in pixels.
+ *
+ * Returns:
+ * @returns {void} Does not return a value.
+ */
 const drawRoundedBar = (ctx, x, y, width, height) => {
   if (typeof ctx.roundRect === "function") {
     ctx.beginPath();
@@ -15,6 +28,15 @@ const drawRoundedBar = (ctx, x, y, width, height) => {
   ctx.fillRect(x, y, width, height);
 };
 
+/**
+ * Manages live waveform visualization for microphone recording.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {object} Waveform refs and controls with canvasRef, startWaveform, and stopWaveform.
+ */
 export const useWaveformVisualizer = () => {
   const canvasRef = useRef(null);
   const audioContextRef = useRef(null);

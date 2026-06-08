@@ -29,6 +29,15 @@ const LOGIN_PROVIDERS = [
   },
 ];
 
+/**
+ * Renders the login page and saves browser auth state after successful login.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {JSX.Element} Login page with marketing top bar, credential form, and placeholder social buttons.
+ */
 export default function LoginPage() {
   const navigate = useNavigate();
   const [error, setError] = useState("");

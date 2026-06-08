@@ -1,3 +1,13 @@
+/**
+ * Renders the notice shown when a text-only analysis has no delivery scores.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {string} props.message - Text-only score analysis message.
+ *
+ * Returns:
+ * @returns {JSX.Element} Text analysis notice card.
+ */
 export default function TextAnalysisNotice({ message }) {
   return (
     <div className="card card--padded-lg analysis-card">

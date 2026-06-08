@@ -1,6 +1,16 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
+/**
+ * Renders a labeled divider in the auth form.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {string} props.label - Divider label text.
+ *
+ * Returns:
+ * @returns {JSX.Element} Divider row with horizontal lines and label text.
+ */
 function Divider({ label }) {
   return (
     <div className="flex items-center gap-4 mb-8">
@@ -13,6 +23,16 @@ function Divider({ label }) {
   );
 }
 
+/**
+ * Renders placeholder social sign-in buttons.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {object[]} props.providers - Social provider button definitions with label and icon.
+ *
+ * Returns:
+ * @returns {JSX.Element|null} Social button group and divider, or null when no providers are supplied.
+ */
 function SocialSignInOptions({ providers }) {
   if (!providers.length) return null;
 
@@ -37,6 +57,26 @@ function SocialSignInOptions({ providers }) {
   );
 }
 
+/**
+ * Renders a reusable username/password auth form.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {string} props.title - Form heading.
+ * @param {string} props.subtitle - Form supporting copy.
+ * @param {string} [props.dividerLabel] - Optional divider label before credential fields.
+ * @param {string} props.submitLabel - Submit button text when idle.
+ * @param {string} props.submittingLabel - Submit button text while submitting.
+ * @param {string} props.secondaryLabel - Secondary navigation link label.
+ * @param {string} props.secondaryTo - Secondary navigation route.
+ * @param {string} [props.error] - User-facing error message.
+ * @param {boolean} props.isSubmitting - Whether form submission is in progress.
+ * @param {object[]} [props.socialProviders] - Optional placeholder social provider buttons.
+ * @param {Function} props.onSubmit - Called with username and password when submitted.
+ *
+ * Returns:
+ * @returns {JSX.Element} Auth form with username, password, submit, secondary link, and optional social buttons.
+ */
 export default function AuthForm({
   title,
   subtitle,

@@ -6,6 +6,15 @@ import { logError } from "./logger";
 
 const ANALYSIS_STORAGE_KEY = "pitchPalResults";
 
+/**
+ * Reads the saved analysis result from localStorage.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {{data: object|null, error: string}} Stored analysis data with empty error when valid; null data with "No analysis data found. Please record a pitch first." when missing; null data with "Error loading analysis data" when malformed.
+ */
 export const readStoredAnalysis = () => {
   const raw = localStorage.getItem(ANALYSIS_STORAGE_KEY);
 
@@ -30,14 +39,41 @@ export const readStoredAnalysis = () => {
   }
 };
 
+/**
+ * Saves an analysis result to localStorage.
+ *
+ * Args:
+ * @param {object} analysisResult - Analysis response or dashboard pitch analysis data to store.
+ *
+ * Returns:
+ * @returns {void} Does not return a value.
+ */
 export const saveAnalysisResult = (analysisResult) => {
   localStorage.setItem(ANALYSIS_STORAGE_KEY, JSON.stringify(analysisResult));
 };
 
+/**
+ * Clears the saved analysis result from localStorage.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {void} Does not return a value.
+ */
 export const clearAnalysisResult = () => {
   localStorage.removeItem(ANALYSIS_STORAGE_KEY);
 };
 
+/**
+ * Converts a dashboard pitch row into the shape used by the analysis page.
+ *
+ * Args:
+ * @param {object} pitch - Dashboard pitch object selected by the user.
+ *
+ * Returns:
+ * @returns {object} Stored analysis object with transcript, improved transcript, score availability, score fields, feedback, modification regions, and changes.
+ */
 export const toStoredAnalysis = (pitch) => ({
   transcript: pitch.transcript,
   improvedPitch: pitch.improvedPitch,

@@ -95,6 +95,16 @@ loggedTest('createGoogleSheetsClient.initializeAuth - caches auth client', LOCAT
   assert.deepEqual(firstAuth.config.scopes, ['https://www.googleapis.com/auth/spreadsheets']);
 });
 
+loggedTest('createGoogleSheetsClient.getSheetsApi - cached API', LOCATION, async () => {
+  const sheetsApi = { spreadsheets: {} };
+  const client = createGoogleSheetsClient({
+    initialSheetsApi: sheetsApi,
+    logger: createLogger(),
+  });
+
+  assert.equal(await client.getSheetsApi(), sheetsApi);
+});
+
 loggedTest('createGoogleSheetsClient.ensureSheet - missing sheet', LOCATION, async () => {
   const calls = [];
   const api = {
@@ -202,6 +212,31 @@ loggedTest('createGoogleSheetsClient.appendToSheet - row wrapper', LOCATION, asy
   assert.equal(request.spreadsheetId, 'sheet_123');
   assert.equal(request.range, 'Sheet1!A:M');
   assert.deepEqual(request.resource.values, [['row']]);
+});
+
+loggedTest('createGoogleSheetsClient.updateSheet - row wrapper', LOCATION, async () => {
+  let request;
+  const api = {
+    spreadsheets: {
+      values: {
+        update: async (receivedRequest) => {
+          request = receivedRequest;
+          return { data: { updatedRows: 1 } };
+        },
+      },
+    },
+  };
+  const client = createGoogleSheetsClient({
+    initialSheetsApi: api,
+    logger: createLogger(),
+  });
+
+  const result = await client.updateSheet('sheet_123', 'Users!E2', ['2026-01-01']);
+
+  assert.deepEqual(result, { updatedRows: 1 });
+  assert.equal(request.spreadsheetId, 'sheet_123');
+  assert.equal(request.range, 'Users!E2');
+  assert.deepEqual(request.resource.values, [['2026-01-01']]);
 });
 
 loggedTest('createGoogleSheetsClient.getSheetValues - missing values fallback', LOCATION, async () => {

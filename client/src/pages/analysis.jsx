@@ -12,6 +12,15 @@ import { usePitchAudio } from "../hooks/usePitchAudio";
 import { readStoredAnalysis } from "../utils/analysisResults";
 import { toAnalysisViewModel } from "../utils/analysisViewModel";
 
+/**
+ * Renders saved pitch analysis, transcript feedback, revision regions, and generated audio controls.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {JSX.Element} Analysis page or missing-analysis fallback state.
+ */
 function Analysis() {
   const [storedAnalysis] = useState(readStoredAnalysis);
   const [showMissingAnalysisPrompt, setShowMissingAnalysisPrompt] = useState(

@@ -8,6 +8,16 @@ const NAV_LINKS = [
   { href: "/analysis", icon: "psychology", label: "AI Feedback", page: "analysis" },
 ];
 
+/**
+ * Renders the app sidebar navigation and logout action.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {string} props.activePage - Current active page key.
+ *
+ * Returns:
+ * @returns {JSX.Element} Sidebar with navigation, upgrade card, and optional logout button.
+ */
 function Sidebar({ activePage }) {
   const navigate = useNavigate();
   const currentUser = getAuthenticatedUser();

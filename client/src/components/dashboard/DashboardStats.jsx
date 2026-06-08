@@ -1,3 +1,18 @@
+/**
+ * Renders one dashboard statistic card.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {string} props.icon - Material Symbols icon name.
+ * @param {string} props.tone - Visual tone class suffix.
+ * @param {string} props.label - Statistic label.
+ * @param {string|number} props.value - Statistic value.
+ * @param {string} [props.suffix] - Optional value suffix.
+ * @param {string} [props.badge] - Optional badge text.
+ *
+ * Returns:
+ * @returns {JSX.Element} Dashboard statistic card.
+ */
 function StatsCard({
   icon,
   tone,
@@ -34,6 +49,16 @@ function StatsCard({
   );
 }
 
+/**
+ * Renders the dashboard aggregate statistics grid.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {object} props.stats - Dashboard aggregate stats.
+ *
+ * Returns:
+ * @returns {JSX.Element} Dashboard stats grid.
+ */
 export default function DashboardStats({ stats }) {
   const statCards = [
     {

@@ -1,3 +1,14 @@
+/**
+ * Renders original transcript audio playback button.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {Function} props.onClick - Playback click handler.
+ * @param {boolean} props.isGenerating - Whether audio generation is in progress.
+ *
+ * Returns:
+ * @returns {JSX.Element} Transcript audio button.
+ */
 function AudioButton({ onClick, isGenerating }) {
   return (
     <button
@@ -14,6 +25,17 @@ function AudioButton({ onClick, isGenerating }) {
   );
 }
 
+/**
+ * Renders one strong-point or focus feedback item.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {object} props.item - Feedback item with timestamp, quote, and explanation.
+ * @param {string} props.tone - Feedback tone, either "strong" or "focus".
+ *
+ * Returns:
+ * @returns {JSX.Element} Feedback item card.
+ */
 function FeedbackItem({ item, tone }) {
   const isStrong = tone === "strong";
   const label = isStrong ? "AI Co-pilot Insight" : "Improvement Area";
@@ -45,6 +67,20 @@ function FeedbackItem({ item, tone }) {
   );
 }
 
+/**
+ * Renders transcript text with strong points and improvement focus areas.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {string} props.transcript - Original pitch transcript.
+ * @param {object[]} props.strongPoints - Strong feedback items.
+ * @param {object[]} props.needsFocus - Improvement feedback items.
+ * @param {Function} props.onHearPitch - Click handler for original transcript audio playback.
+ * @param {boolean} props.isGeneratingAudio - Whether original transcript audio is generating.
+ *
+ * Returns:
+ * @returns {JSX.Element} Transcript and feedback card.
+ */
 export default function TranscriptFeedback({
   transcript,
   strongPoints,

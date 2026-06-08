@@ -10,6 +10,15 @@ const pitches = [
   { date: "2026-06-05", description: "Text revision", name: "Revision", status: "Text Only" },
 ];
 
+globalThis.loggedClientTest("getSearchablePitchText - visible fields", LOCATION, async () => {
+  const { getSearchablePitchText } = await globalThis.loadClientModule("/src/utils/dashboardViewModel.js");
+
+  assert.equal(
+    getSearchablePitchText(pitches[0]),
+    "launch recorded investor pitch recorded 2026-06-01"
+  );
+});
+
 globalThis.loggedClientTest("filterPitchesBySearch - searches visible fields", LOCATION, async () => {
   const { filterPitchesBySearch } = await globalThis.loadClientModule("/src/utils/dashboardViewModel.js");
 
@@ -35,6 +44,16 @@ globalThis.loggedClientTest("paginatePitches - page slicing", LOCATION, async ()
     paginatePitches(pitches, 3, 2).map((pitch) => pitch.name),
     ["Revision"]
   );
+});
+
+globalThis.loggedClientTest("getTotalPages - empty and partial pages", LOCATION, async () => {
+  const { getTotalPages } = await globalThis.loadClientModule("/src/utils/dashboardViewModel.js");
+
+  assert.equal(getTotalPages(0), 1);
+  assert.equal(getTotalPages(1, 4), 1);
+  assert.equal(getTotalPages(4, 4), 1);
+  assert.equal(getTotalPages(5, 4), 2);
+  assert.equal(getTotalPages(9, 4), 3);
 });
 
 globalThis.loggedClientTest("getVisiblePages - compact window", LOCATION, async () => {

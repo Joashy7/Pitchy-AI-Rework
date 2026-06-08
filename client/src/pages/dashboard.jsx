@@ -14,6 +14,15 @@ import {
   paginatePitches,
 } from "../utils/dashboardViewModel";
 
+/**
+ * Renders the dashboard pitch archive with stats, search, pagination, and analysis selection.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {JSX.Element} Dashboard page wrapped in the app shell.
+ */
 function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");

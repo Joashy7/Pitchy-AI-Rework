@@ -1,3 +1,15 @@
+/**
+ * Renders the improved pitch audio playback button.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {boolean} props.disabled - Whether playback is disabled.
+ * @param {boolean} props.isGenerating - Whether audio generation is in progress.
+ * @param {Function} props.onClick - Playback click handler.
+ *
+ * Returns:
+ * @returns {JSX.Element} Improved pitch audio button.
+ */
 function ImprovedAudioButton({ disabled, isGenerating, onClick }) {
   return (
     <button
@@ -14,6 +26,18 @@ function ImprovedAudioButton({ disabled, isGenerating, onClick }) {
   );
 }
 
+/**
+ * Renders the improved pitch transcript and playback action.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {string} props.improvedPitch - Improved pitch transcript.
+ * @param {Function} props.onHearImprovedPitch - Click handler for generated audio playback.
+ * @param {boolean} props.isGeneratingImprovedAudio - Whether improved-pitch audio is generating.
+ *
+ * Returns:
+ * @returns {JSX.Element} Improved pitch card.
+ */
 export default function ImprovedPitchCard({
   improvedPitch,
   onHearImprovedPitch,
