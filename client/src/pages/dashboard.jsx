@@ -1,178 +1,170 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import AppShell from "../components/layout/AppShell";
+
+const API_BASE_URL = "http://localhost:3000";
+
+const DEFAULT_STATS = {
+  totalPitches: 0,
+  avgScore: 0,
+  totalRecordingTime: "0.0",
+  newThisWeek: 0,
+  scoreBadge: "Building",
+  improvementRate: "+0%",
+  improvementLabel: "Steady",
+};
 
 function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [pitchData, setPitchData] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState(DEFAULT_STATS);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const itemsPerPage = 4;
 
-  const pitchData = [
-    {
-      id: 1,
-      name: "Seed Round Prep",
-      description: "Series A Pitch Deck v4",
-      date: "Oct 24, 2023",
-      persona: "The VC Critic",
-      duration: "12:45",
-      score: 82,
-      status: "IMPROVING",
-    },
-    {
-      id: 2,
-      name: "Product Launch Keynote",
-      description: "Internal Stakeholders",
-      date: "Oct 22, 2023",
-      persona: "The Friendly Mentor",
-      duration: "08:12",
-      score: 94,
-      status: "ELITE",
-    },
-    {
-      id: 3,
-      name: "Client Onboarding",
-      description: "Enterprise Sales Deck",
-      date: "Oct 19, 2023",
-      persona: "The Hard Negotiator",
-      duration: "15:30",
-      score: 64,
-      status: "ACTION NEEDED",
-    },
-    {
-      id: 4,
-      name: "Elevator Pitch v2",
-      description: "Networking Event Prep",
-      date: "Oct 15, 2023",
-      persona: "The VC Critic",
-      duration: "02:00",
-      score: 78,
-      status: "IMPROVING",
-    },
-  ];
+  useEffect(() => {
+    let isActive = true;
 
-  const totalPitches = 24;
-  const avgScore = 86;
-  const totalRecordingTime = "4.2";
-  const improvementRate = "+12%";
+    const loadDashboardData = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/dashboard-data`);
+        const result = await res.json();
 
-  const getStatusColor = (status) => {
+        if (!res.ok || !result.success) {
+          throw new Error(result.error || "Failed to load dashboard data");
+        }
+
+        if (isActive) {
+          setPitchData(Array.isArray(result.pitches) ? result.pitches : []);
+          setDashboardStats({ ...DEFAULT_STATS, ...(result.stats || {}) });
+          setError("");
+        }
+      } catch (loadError) {
+        console.error("Dashboard data error:", loadError);
+
+        if (isActive) {
+          setError(loadError.message || "Failed to load dashboard data");
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadDashboardData();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const filteredPitchData = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    if (!normalizedSearch) return pitchData;
+
+    return pitchData.filter((pitch) => {
+      const searchableText = [
+        pitch.name,
+        pitch.description,
+        pitch.persona,
+        pitch.status,
+        pitch.date,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(normalizedSearch);
+    });
+  }, [pitchData, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredPitchData.length / itemsPerPage));
+  const paginatedPitchData = filteredPitchData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const visiblePages = useMemo(() => {
+    const pages = [];
+    const firstPage = Math.max(1, Math.min(currentPage - 1, totalPages - 3));
+    const lastPage = Math.min(totalPages, firstPage + 3);
+
+    for (let page = firstPage; page <= lastPage; page += 1) {
+      pages.push(page);
+    }
+
+    return pages;
+  }, [currentPage, totalPages]);
+
+  const totalPitches = dashboardStats.totalPitches;
+  const avgScore = dashboardStats.avgScore;
+  const totalRecordingTime = dashboardStats.totalRecordingTime;
+  const improvementRate = dashboardStats.improvementRate;
+  const showingStart = filteredPitchData.length ? (currentPage - 1) * itemsPerPage + 1 : 0;
+  const showingEnd = Math.min(currentPage * itemsPerPage, filteredPitchData.length);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1);
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage((page) => Math.max(1, page - 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((page) => Math.min(totalPages, page + 1));
+  };
+
+  const handleViewAnalysis = (pitch) => {
+    localStorage.setItem(
+      "pitchPalResults",
+      JSON.stringify({
+        transcript: pitch.transcript,
+        improvedPitch: pitch.improvedPitch,
+        improved_transcript: pitch.improvedPitch,
+        overall_score: pitch.overall_score,
+        summary_feedback: pitch.summary_feedback,
+        clarity: pitch.clarity,
+        persuasiveness: pitch.persuasiveness,
+        confidence: pitch.confidence,
+        narrative_flow: pitch.narrative_flow,
+      })
+    );
+  };
+
+  const getStatusStyle = (status) => {
     switch (status) {
       case "ELITE":
-        return "status-elite";
+        return {
+          backgroundColor: "rgba(245, 158, 11, 0.15)",
+          color: "#F59E0B",
+        };
       case "IMPROVING":
-        return "status-improving";
+        return {
+          backgroundColor: "rgba(59, 130, 246, 0.15)",
+          color: "#3B82F6",
+        };
       case "ACTION NEEDED":
-        return "status-action";
+        return {
+          backgroundColor: "rgba(239, 68, 68, 0.15)",
+          color: "#EF4444",
+        };
       default:
-        return "status-default";
+        return {
+          backgroundColor: "rgba(156, 163, 175, 0.15)",
+          color: "#9CA3AF",
+        };
     }
   };
 
   return (
-    <div className="dark">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div style={{ padding: "var(--space-8)" }}>
-          <div className="sidebar__brand">
-            <div className="sidebar__logo">
-              <span
-                className="material-symbols-outlined text-white"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                rocket_launch
-              </span>
-            </div>
-
-            <div>
-              <p className="sidebar__app-name">Pitchy-AI</p>
-              <p className="sidebar__app-tagline">Your Pitch. Perfected.</p>
-            </div>
-          </div>
-
-          <nav className="sidebar__nav">
-            <a href="/landing" className="sidebar__nav-link">
-              <span className="material-symbols-outlined">home</span>
-              Home
-            </a>
-
-            <a href="/dashboard" className="sidebar__nav-link active">
-              <span className="material-symbols-outlined">dashboard</span>
-              Dashboard
-            </a>
-
-            <a href="/analysis" className="sidebar__nav-link">
-              <span className="material-symbols-outlined">psychology</span>
-              AI Feedback
-            </a>
-
-            <a href="#" className="sidebar__nav-link">
-              <span className="material-symbols-outlined">settings_suggest</span>
-              Settings
-            </a>
-          </nav>
-        </div>
-
-        <div className="sidebar__footer">
-          <div className="upgrade-card">
-            <p className="upgrade-card__label">Upgrade to Pro</p>
-            <p className="upgrade-card__body">Unlock advanced neural analysis</p>
-            <button className="upgrade-card__btn">Get Started</button>
-          </div>
-
-          <nav className="sidebar__footer-nav">
-            <a href="#" className="sidebar__footer-link">
-              <span className="material-symbols-outlined">help</span>
-              Help Center
-            </a>
-
-            <a href="#" className="sidebar__footer-link">
-              <span className="material-symbols-outlined">logout</span>
-              Logout
-            </a>
-          </nav>
-        </div>
-      </aside>
-
-      {/* Main Body */}
-      <main className="main-canvas">
-        <header className="bg-[#121416]/60 backdrop-blur-xl border-b border-[#414754]/15 h-16 sticky top-0 z-40 flex justify-between items-center px-8 max-w-[1920px] mx-auto">
-          <div className="flex items-center gap-8">
-            <div className="relative hidden md:block">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                search
-              </span>
-
-              <input
-                className="bg-surface-container-lowest border-none rounded-full py-1.5 pl-10 pr-4 text-xs text-on-surface focus:ring-1 focus:ring-primary w-64 placeholder:text-slate-600"
-                placeholder="Search pitches..."
-                type="text"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button className="pitch-gradient text-on-primary-fixed font-headline font-bold text-sm px-6 py-2 rounded-full active:scale-95 transition-all shadow-lg shadow-primary/20">
-              <a href="/new-pitch">New Pitch</a>
-            </button>
-
-            <div className="flex items-center gap-2 border-l border-outline-variant/30 pl-4">
-              <button className="p-2 text-slate-400 hover:text-white transition-colors">
-                <span className="material-symbols-outlined">notifications</span>
-              </button>
-
-              <button className="p-2 text-slate-400 hover:text-white transition-colors">
-                <span className="material-symbols-outlined">settings</span>
-              </button>
-
-              <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/30">
-                <img
-                  alt="User profile"
-                  className="w-full h-full object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEEkbMJ1oKR7lOHtujcFiuIzNc3K1uVHXipnX4-Rmtd2IXcQ0PrXPdhTjvL6zX0QvoJ64XX_0TiH-xL8XmiuCr5wooUWjk31OoG6C2n714SEQs-JR_F53Q2jZGPNlp7LISbArZLZZ5qGMTsFhaE1NX7EeScxjResy2KGnHpbMMSwgKZwH7gnWqSe0ZSlIDj3kLAvPajb2VZJie9zp8y5ud-GXDXFbyt_2rz7oPywnrlvbBvh8OeDHDuIB0k1ClJnbAWqBBi1TjVmo"
-                />
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <section className="page-section">
+    <AppShell
+      activePage="dashboard"
+      searchValue={searchTerm}
+      onSearchChange={handleSearchChange}
+    >
+      <section className="page-section">
           <div className="page-header">
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
               <span style={{ fontSize: "12px", fontWeight: "600", letterSpacing: "1px", color: "#8BA3FF", textTransform: "uppercase" }}>
@@ -197,7 +189,7 @@ function Dashboard() {
                   </span>
                 </div>
                 <span style={{ fontSize: "12px", fontWeight: "600", color: "#8BA3FF", backgroundColor: "rgba(139, 163, 255, 0.1)", padding: "6px 12px", borderRadius: "6px" }}>
-                  +3 this week
+                  {dashboardStats.newThisWeek > 0 ? `+${dashboardStats.newThisWeek} this week` : "No new this week"}
                 </span>
               </div>
               <p style={{ fontSize: "12px", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "8px" }}>
@@ -209,10 +201,12 @@ function Dashboard() {
             <div className="card card--padded-lg" style={{ backgroundColor: "#1a1d21", borderColor: "#414754" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "24px" }}>
                 <div style={{ width: "40px", height: "40px", backgroundColor: "#2a2f38", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: "20px" }}>⭐</span>
+                  <span className="material-symbols-outlined" style={{ color: "#F59E0B" }}>
+                    grade
+                  </span>
                 </div>
                 <span style={{ fontSize: "12px", fontWeight: "600", color: "#F59E0B", backgroundColor: "rgba(245, 158, 11, 0.1)", padding: "6px 12px", borderRadius: "6px" }}>
-                  Top 5%
+                  {dashboardStats.scoreBadge}
                 </span>
               </div>
               <p style={{ fontSize: "12px", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "8px" }}>
@@ -253,7 +247,7 @@ function Dashboard() {
               <p style={{ fontSize: "12px", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "8px" }}>
                 Improvement Rate
               </p>
-              <p style={{ fontSize: "32px", fontWeight: "700", color: "#FFFFFF" }}>Steady</p>
+              <p style={{ fontSize: "32px", fontWeight: "700", color: "#FFFFFF" }}>{dashboardStats.improvementLabel}</p>
             </div>
           </div>
 
@@ -299,7 +293,25 @@ function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pitchData.map((pitch) => (
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: "32px", textAlign: "center", color: "#9CA3AF" }}>
+                        Loading pitch history...
+                      </td>
+                    </tr>
+                  ) : error ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: "32px", textAlign: "center", color: "#EF4444" }}>
+                        {error}
+                      </td>
+                    </tr>
+                  ) : paginatedPitchData.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: "32px", textAlign: "center", color: "#9CA3AF" }}>
+                        No saved pitches found.
+                      </td>
+                    </tr>
+                  ) : paginatedPitchData.map((pitch) => (
                     <tr key={pitch.id} style={{ borderBottom: "1px solid #2a2f38", transition: "background-color 0.2s" }}>
                       <td style={{ padding: "16px" }}>
                         <div>
@@ -337,18 +349,7 @@ function Dashboard() {
                             fontWeight: "600",
                             padding: "6px 12px",
                             borderRadius: "4px",
-                            backgroundColor:
-                              pitch.status === "ELITE"
-                                ? "rgba(245, 158, 11, 0.15)"
-                                : pitch.status === "IMPROVING"
-                                ? "rgba(59, 130, 246, 0.15)"
-                                : "rgba(239, 68, 68, 0.15)",
-                            color:
-                              pitch.status === "ELITE"
-                                ? "#F59E0B"
-                                : pitch.status === "IMPROVING"
-                                ? "#3B82F6"
-                                : "#EF4444",
+                            ...getStatusStyle(pitch.status),
                           }}
                         >
                           {pitch.status}
@@ -356,7 +357,7 @@ function Dashboard() {
                       </td>
                       <td style={{ padding: "16px" }}>
                         <a
-                          href="#"
+                          href="/analysis"
                           style={{
                             fontSize: "14px",
                             fontWeight: "600",
@@ -365,6 +366,7 @@ function Dashboard() {
                             cursor: "pointer",
                             transition: "color 0.2s",
                           }}
+                          onClick={() => handleViewAnalysis(pitch)}
                           onMouseEnter={(e) => (e.target.style.color = "#A8B8FF")}
                           onMouseLeave={(e) => (e.target.style.color = "#8BA3FF")}
                         >
@@ -379,9 +381,13 @@ function Dashboard() {
 
             {/* Pagination */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "24px", paddingTop: "16px", borderTop: "1px solid #414754" }}>
-              <p style={{ fontSize: "12px", color: "#9CA3AF" }}>Showing 1-4 of {totalPitches} pitches</p>
+              <p style={{ fontSize: "12px", color: "#9CA3AF" }}>
+                Showing {showingStart}-{showingEnd} of {filteredPitchData.length} pitches
+              </p>
               <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                 <button
+                  disabled={currentPage === 1}
+                  onClick={handlePreviousPage}
                   style={{
                     width: "32px",
                     height: "32px",
@@ -389,43 +395,46 @@ function Dashboard() {
                     border: "1px solid #414754",
                     borderRadius: "4px",
                     color: "#9CA3AF",
-                    cursor: "pointer",
+                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                    opacity: currentPage === 1 ? 0.5 : 1,
                     transition: "all 0.2s",
                   }}
                   onMouseEnter={(e) => {
+                    if (currentPage === 1) return;
                     e.target.style.backgroundColor = "#3a3f48";
                     e.target.style.color = "#FFFFFF";
                   }}
                   onMouseLeave={(e) => {
+                    if (currentPage === 1) return;
                     e.target.style.backgroundColor = "#2a2f38";
                     e.target.style.color = "#9CA3AF";
                   }}
                 >
-                  ‹
+                  {"<"}
                 </button>
-                {[1, 2, 3, 6].map((page) => (
+                {visiblePages.map((page) => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
                     style={{
                       width: "32px",
                       height: "32px",
-                      backgroundColor: page === 1 ? "#5B7FFF" : "#2a2f38",
+                      backgroundColor: page === currentPage ? "#5B7FFF" : "#2a2f38",
                       border: "1px solid #414754",
                       borderRadius: "4px",
-                      color: page === 1 ? "#FFFFFF" : "#9CA3AF",
+                      color: page === currentPage ? "#FFFFFF" : "#9CA3AF",
                       cursor: "pointer",
-                      fontWeight: page === 1 ? "600" : "400",
+                      fontWeight: page === currentPage ? "600" : "400",
                       transition: "all 0.2s",
                     }}
                     onMouseEnter={(e) => {
-                      if (page !== 1) {
+                      if (page !== currentPage) {
                         e.target.style.backgroundColor = "#3a3f48";
                         e.target.style.color = "#FFFFFF";
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (page !== 1) {
+                      if (page !== currentPage) {
                         e.target.style.backgroundColor = "#2a2f38";
                         e.target.style.color = "#9CA3AF";
                       }
@@ -435,6 +444,8 @@ function Dashboard() {
                   </button>
                 ))}
                 <button
+                  disabled={currentPage === totalPages}
+                  onClick={handleNextPage}
                   style={{
                     width: "32px",
                     height: "32px",
@@ -442,26 +453,28 @@ function Dashboard() {
                     border: "1px solid #414754",
                     borderRadius: "4px",
                     color: "#9CA3AF",
-                    cursor: "pointer",
+                    cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                    opacity: currentPage === totalPages ? 0.5 : 1,
                     transition: "all 0.2s",
                   }}
                   onMouseEnter={(e) => {
+                    if (currentPage === totalPages) return;
                     e.target.style.backgroundColor = "#3a3f48";
                     e.target.style.color = "#FFFFFF";
                   }}
                   onMouseLeave={(e) => {
+                    if (currentPage === totalPages) return;
                     e.target.style.backgroundColor = "#2a2f38";
                     e.target.style.color = "#9CA3AF";
                   }}
                 >
-                  ›
+                  {">"}
                 </button>
               </div>
             </div>
           </div>
-        </section>
-      </main>
-    </div>
+      </section>
+    </AppShell>
   );
 }
 

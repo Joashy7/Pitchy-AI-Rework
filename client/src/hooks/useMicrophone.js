@@ -54,12 +54,15 @@ export function useMicrophone() {
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
     const ctx = canvasRef.current.getContext("2d");
+    if (!ctx) return;
 
     const draw = () => {
       animFrameIdRef.current = requestAnimationFrame(draw);
 
       const W = canvasRef.current.clientWidth;
       const H = canvasRef.current.clientHeight;
+
+      if (!W || !H) return;
 
       if (canvasRef.current.width !== W || canvasRef.current.height !== H) {
         canvasRef.current.width = W;
@@ -83,9 +86,13 @@ export function useMicrophone() {
         const alpha = 0.35 + value * 0.65;
         ctx.fillStyle = `rgba(60, 144, 255, ${alpha})`;
 
-        ctx.beginPath();
-        ctx.roundRect(x, y, barW, barH, barW / 2);
-        ctx.fill();
+        if (typeof ctx.roundRect === "function") {
+          ctx.beginPath();
+          ctx.roundRect(x, y, barW, barH, barW / 2);
+          ctx.fill();
+        } else {
+          ctx.fillRect(x, y, barW, barH);
+        }
       }
     };
 
@@ -186,9 +193,20 @@ export function useMicrophone() {
       setIsRecording(true);
 
       startTimer();
-      startWaveform(stream);
+      requestAnimationFrame(() => {
+        try {
+          startWaveform(stream);
+        } catch (waveformError) {
+          console.warn("Waveform visualization unavailable:", waveformError);
+        }
+      });
     } catch (error) {
       console.error("Recording start error:", error);
+      stopTimer();
+      stopWaveform();
+      setIsRecording(false);
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
 
       let errorMessage = "Could not access microphone";
       if (error.name === "NotAllowedError") {
