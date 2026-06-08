@@ -1,0 +1,238 @@
+.dashboard-eyebrow {
+  color: #8ba3ff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.dashboard-stat-card {
+  background-color: #1a1d21;
+  border-color: #414754;
+}
+
+.dashboard-stat-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.dashboard-stat-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background-color: #2a2f38;
+}
+
+.dashboard-stat-card__icon--primary { color: #8ba3ff; }
+.dashboard-stat-card__icon--warning { color: #f59e0b; }
+.dashboard-stat-card__icon--success { color: #22c55e; }
+
+.dashboard-stat-card__badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.dashboard-stat-card__badge--primary {
+  background-color: rgba(139, 163, 255, 0.1);
+  color: #8ba3ff;
+}
+
+.dashboard-stat-card__badge--warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.dashboard-stat-card__badge--success {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.dashboard-stat-card__label {
+  margin-bottom: 8px;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.dashboard-stat-card__value {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.dashboard-stat-card__suffix {
+  color: #9ca3af;
+  font-size: 1.25rem;
+}
+
+.pitch-history__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.pitch-history__title {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.pitch-history__table-wrapper {
+  overflow-x: auto;
+}
+
+.pitch-history__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pitch-history__heading-row {
+  border-bottom: 1px solid #414754;
+}
+
+.pitch-history__header-cell {
+  padding: 16px;
+  color: #9ca3af;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.pitch-history__row {
+  border-bottom: 1px solid #2a2f38;
+  transition: background-color 0.2s;
+}
+
+.pitch-history__cell {
+  padding: 16px;
+  color: #ffffff;
+  font-size: 0.875rem;
+}
+
+.pitch-history__pitch-name {
+  margin-bottom: 4px;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.pitch-history__pitch-description {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.pitch-history__score {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.pitch-history__status {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.pitch-history__status--recorded {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.pitch-history__status--text {
+  background-color: rgba(139, 163, 255, 0.15);
+  color: #8ba3ff;
+}
+
+.pitch-history__status--default {
+  background-color: rgba(156, 163, 175, 0.15);
+  color: #9ca3af;
+}
+
+.pitch-history__analysis-link {
+  color: #8ba3ff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.pitch-history__analysis-link:hover {
+  color: #a8b8ff;
+}
+
+.pitch-history__empty {
+  padding: 32px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.pitch-history__empty--error {
+  color: #ef4444;
+}
+
+.pitch-history__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #414754;
+}
+
+.pitch-history__summary {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.pitch-history__pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pitch-history__pagination-button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #414754;
+  border-radius: 4px;
+  background-color: #2a2f38;
+  color: #9ca3af;
+  cursor: pointer;
+  font-weight: 400;
+  transition: background-color 0.2s, color 0.2s, opacity 0.2s;
+}
+
+.pitch-history__pagination-button:hover:not(:disabled):not(.is-active) {
+  background-color: #3a3f48;
+  color: #ffffff;
+}
+
+.pitch-history__pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pitch-history__pagination-button.is-active {
+  background-color: #5b7fff;
+  color: #ffffff;
+  font-weight: 600;
+}

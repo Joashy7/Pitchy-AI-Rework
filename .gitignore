@@ -7,3 +7,6 @@
 node_modules/
 
 service_account.json
+
+# Local demo storage
+.local/

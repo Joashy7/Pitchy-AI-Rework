@@ -4,10 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "vite --config config/vite.config.js",
+    "build": "vite build --config config/vite.config.js",
+    "lint": "eslint . --config config/eslint.config.js",
+    "preview": "vite preview --config config/vite.config.js",
+    "test": "npm run test:server && npm run test:client",
+    "test:client": "node client/unit.test.js",
+    "test:server": "node server/unit.test.js",
+    "test:server:integration": "node server/tests/integration.test.js",
+    "test:server:smoke": "node server/tests/smoke.test.js",
+    "test:server:unit": "node server/tests/unit.test.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

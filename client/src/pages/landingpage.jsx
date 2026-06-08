@@ -1,56 +1,78 @@
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
 
-export default function LandingPage() {
+import MarketingTopBar from "../components/layout/MarketingTopBar";
+
+const FEATURES = [
+  {
+    icon: "visibility",
+    label: "Clarity",
+    accent: "primary",
+    desc: "Evaluation of jargon-free communication and core concept simplicity.",
+  },
+  {
+    icon: "bolt",
+    label: "Persuasiveness",
+    accent: "tertiary",
+    desc: "Analyzing emotional resonance and the strength of your call-to-action.",
+  },
+  {
+    icon: "account_tree",
+    label: "Structure",
+    accent: "primary",
+    desc: "Assessment of narrative flow and logical sequence of deck sections.",
+  },
+  {
+    icon: "psychology",
+    label: "Problem Definition",
+    accent: "tertiary",
+    desc: "How clearly you articulate the pain point your startup solves.",
+  },
+  {
+    icon: "diamond",
+    label: "Solution Strength",
+    accent: "primary",
+    desc: "Verifying the uniqueness and scalability of your proposed fix.",
+  },
+];
+
+const WORKFLOW_STEPS = [
+  {
+    step: "01",
+    title: "Record",
+    desc: "Upload your pitch as text or record your delivery directly in the browser with studio-quality audio capture.",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuC9CGoV4Ui31o0sDFQS1rhq75Co844UiiCl36FRHxbhJtvF5PnVwqXqXzawi9xEkZVOjCXt9ZzGvEUpJuymjnm3y4D53RhhHhDZOT6BewewFNeVQQQw15kCzbsr5j5xhZ-riQIQ8aE47aywC1r57rSho9Ccfszb2bm-fcqj-8UIwWUf6K-nZ69KFQjvbqo4DB7vPtQfB9XtQj5mqPIkjHmQddYBZR3852DCzcc5FppwBgtrQb9DrDBGAoJioNyrU89kEcrq-MEfZkM",
+    alt: "Professional condenser microphone in a dark studio setting",
+  },
+  {
+    step: "02",
+    title: "Analyze",
+    desc: "Gemini AI reviews your narrative while specialized voice models detect tone, pace, and filler word frequency.",
+    img: "https://thumbs.dreamstime.com/b/abstract-blue-digital-network-mesh-glowing-nodes-data-connections-technology-cybersecurity-background-highly-445915836.jpg",
+    alt: "Abstract visualization of neural network pathways with glowing blue nodes",
+  },
+  {
+    step: "03",
+    title: "Improve",
+    desc: "Get specific rewrite suggestions and audio versions of your pitch performed by AI voices from ElevenLabs for imitation.",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDlubZvyCcX3iikwi6deVXVSEQm3I4yhGq08b9LqAJkz5GBm3Et7oZsvELUrNArrLtTESOqdAuVT2Lofp_aJd2z3QOFXfnOPx7DN0Kck2dS4wyMYDX1WMvf-tJOrX0ZAsKePqH-4ueuYDT0otMK1vhILFQk94CjoNWHbjQIOegrmlIMEcqkeGThbeIc9Gbxt_qnQ63F169qqTMGIvIKI7i_ORdmCfoC1lZMZ-P7ScU5DQdb_sOx9ykIZ0o9bLawq1xkoO6qfN6VOkI",
+    alt: "Clean financial data chart on a monitor in a minimalist dark office",
+  },
+];
+
+const STATS = [
+  { value: "98%", label: "Confidence Lift" },
+  { value: "12k+", label: "Pitches Analyzed" },
+  { value: "24/7", label: "Coach Availability" },
+  { value: "4.9/5", label: "Founder Rating" },
+];
+
+function LandingPage() {
   return (
     <div className="bg-background text-on-background font-body">
+      <MarketingTopBar />
 
-      {/* ── Nav ── */}
-      <nav className="fixed top-0 w-full z-50 bg-slate-950/60 backdrop-blur-xl shadow-2xl shadow-blue-900/20">
-        <div className="flex justify-between items-center max-w-7xl mx-auto px-6 py-4 w-full">
-
-          {/* Brand */}
-          <div className="text-2xl font-bold tracking-tighter text-slate-50 font-headline">
-            Pitchy-AI
-          </div>
-
-          {/* Desktop Links */}
-          <div className="hidden md:flex gap-8 items-center">
-            <a href="#features" className="nav-link-active font-headline text-sm font-semibold tracking-wide transition-all duration-300">
-              Features
-            </a>
-            <a href="#how-it-works" className="font-headline text-sm font-semibold tracking-wide text-slate-400 hover:text-slate-100 transition-all duration-300">
-              How it Works
-            </a>
-            <a href="#" className="font-headline text-sm font-semibold tracking-wide text-slate-400 hover:text-slate-100 transition-all duration-300">
-              Pricing
-            </a>
-            <a href="#" className="font-headline text-sm font-semibold tracking-wide text-slate-400 hover:text-slate-100 transition-all duration-300">
-              AI Coaching
-            </a>
-          </div>
-
-          {/* Auth Buttons */}
-          <div className="hidden md:flex gap-4 items-center">
-            <Link
-              to="/login"
-              className="btn-primary-br text-on-primary-container px-6 py-2.5 rounded-xl font-headline text-sm font-bold tracking-wide hover:opacity-80 transition-all duration-300 active:scale-95"
-            >
-              Start Pitching
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* ── Main ── */}
       <main className="pt-20">
-
-        {/* Hero */}
-        <section className="relative min-h-[921px] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <div className="hero-blob-left" />
-            <div className="hero-blob-right" />
-          </div>
-
+        <section className="relative min-h-[760px] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
           <div className="relative z-10 max-w-5xl">
             <span className="inline-block px-4 py-1.5 rounded-full bg-surface-container-high border border-outline-variant/20 text-primary text-xs font-bold tracking-[0.2em] mb-8 font-headline">
               AI-POWERED PERFORMANCE COACH
@@ -70,19 +92,21 @@ export default function LandingPage() {
             <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
               <Link
                 to="/new-pitch"
-                className="w-full md:w-auto px-10 py-5 btn-primary text-on-primary-container rounded-xl font-bold font-headline text-lg hover:opacity-90 transition-all active:scale-95 shadow-xl shadow-primary/20"
+                className="w-full md:w-auto px-10 py-5 btn-primary text-on-primary-container rounded-xl font-bold font-headline text-lg shadow-xl shadow-primary/20"
               >
                 Get Started Free
               </Link>
-              <button className="w-full md:w-auto px-10 py-5 bg-surface-container-highest text-on-surface rounded-xl font-bold font-headline text-lg hover:bg-surface-bright transition-all flex items-center justify-center gap-2">
+              <a
+                href="#how-it-works"
+                className="w-full md:w-auto px-10 py-5 bg-surface-container-highest text-on-surface rounded-xl font-bold font-headline text-lg hover:bg-surface-bright transition-all flex items-center justify-center gap-2"
+              >
                 <span className="material-symbols-outlined">play_circle</span>
-                Watch Demo
-              </button>
+                See How It Works
+              </a>
             </div>
           </div>
         </section>
 
-        {/* Value Proposition */}
         <section id="features" className="py-32 px-6 max-w-7xl mx-auto">
           <div className="mb-20 text-left md:flex justify-between items-end">
             <div className="max-w-xl">
@@ -90,20 +114,14 @@ export default function LandingPage() {
                 Precision Scoring
               </h2>
               <p className="text-on-surface-variant text-lg">
-                Our AI engine decomposes your pitch into 5 critical dimensions to provide
+                Our AI engine decomposes your pitch into critical dimensions to provide
                 actionable, granular improvements.
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-            {[
-              { icon: 'visibility',    label: 'Clarity',            accent: 'primary',   desc: 'Evaluation of jargon-free communication and core concept simplicity.' },
-              { icon: 'bolt',          label: 'Persuasiveness',     accent: 'tertiary',  desc: 'Analyzing emotional resonance and the strength of your call-to-action.' },
-              { icon: 'account_tree',  label: 'Structure',          accent: 'primary',   desc: 'Assessment of narrative flow and logical sequence of deck sections.' },
-              { icon: 'psychology',    label: 'Problem Definition', accent: 'tertiary',  desc: 'How clearly you articulate the pain point your startup solves.' },
-              { icon: 'diamond',       label: 'Solution Strength',  accent: 'primary',   desc: 'Verifying the uniqueness and scalability of your proposed fix.' },
-            ].map(({ icon, label, accent, desc }) => (
+            {FEATURES.map(({ icon, label, accent, desc }) => (
               <div
                 key={label}
                 className={`bg-surface-container-low p-8 rounded-lg card-accent-${accent} hover:bg-surface-container transition-colors group`}
@@ -118,7 +136,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Performance Workflow */}
         <section id="how-it-works" className="py-32 bg-surface-container-lowest relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-6 relative z-10">
             <h2 className="text-4xl md:text-5xl font-headline font-black text-center mb-24 text-on-surface">
@@ -126,31 +143,9 @@ export default function LandingPage() {
             </h2>
 
             <div className="flex flex-col md:flex-row items-start justify-between gap-12">
-              {[
-                {
-                  step: '01',
-                  title: 'Record',
-                  desc: 'Upload your pitch deck as text or record your delivery directly in the browser with studio-quality audio capture.',
-                  img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC9CGoV4Ui31o0sDFQS1rhq75Co844UiiCl36FRHxbhJtvF5PnVwqXqXzawi9xEkZVOjCXt9ZzGvEUpJuymjnm3y4D53RhhHhDZOT6BewewFNeVQQQw15kCzbsr5j5xhZ-riQIQ8aE47aywC1r57rSho9Ccfszb2bm-fcqj-8UIwWUf6K-nZ69KFQjvbqo4DB7vPtQfB9XtQj5mqPIkjHmQddYBZR3852DCzcc5FppwBgtrQb9DrDBGAoJioNyrU89kEcrq-MEfZkM',
-                  alt: 'Professional condenser microphone in a dark studio setting',
-                },
-                {
-                  step: '02',
-                  title: 'Analyze',
-                  desc: 'Gemini AI reviews your narrative while specialized voice models detect tone, pace, and filler word frequency.',
-                  img: 'https://thumbs.dreamstime.com/b/abstract-blue-digital-network-mesh-glowing-nodes-data-connections-technology-cybersecurity-background-highly-445915836.jpg',
-                  alt: 'Abstract 3D visualization of neural network pathways with glowing blue nodes',
-                },
-                {
-                  step: '03',
-                  title: 'Improve',
-                  desc: 'Get specific rewrite suggestions and audio versions of your pitch performed by top-tier AI voices from ElevenLabs for imitation.',
-                  img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDlubZvyCcX3iikwi6deVXVSEQm3I4yhGq08b9LqAJkz5GBm3Et7oZsvELUrNArrLtTESOqdAuVT2Lofp_aJd2z3QOFXfnOPx7DN0Kck2dS4wyMYDX1WMvf-tJOrX0ZAsKePqH-4ueuYDT0otMK1vhILFQk94CjoNWHbjQIOegrmlIMEcqkeGThbeIc9Gbxt_qnQ63F169qqTMGIvIKI7i_ORdmCfoC1lZMZ-P7ScU5DQdb_sOx9ykIZ0o9bLawq1xkoO6qfN6VOkI',
-                  alt: 'Clean financial data chart on a monitor in a minimalist dark office',
-                },
-              ].map(({ step, title, desc, img, alt }, i) => (
-                <>
-                  <div key={step} className="flex-1 relative">
+              {WORKFLOW_STEPS.map(({ step, title, desc, img, alt }, index) => (
+                <div key={step} className="flex flex-1 items-start gap-12">
+                  <div className="flex-1 relative">
                     <div className="mb-8 w-16 h-16 rounded-2xl bg-surface-container-highest flex items-center justify-center text-primary font-headline font-black text-2xl shadow-xl border border-outline-variant/10">
                       {step}
                     </div>
@@ -160,18 +155,17 @@ export default function LandingPage() {
                       <img className="workflow-image" src={img} alt={alt} />
                     </div>
                   </div>
-                  {i < 2 && (
-                    <div key={`arrow-${i}`} className="hidden md:block pt-8 text-outline-variant/30">
+                  {index < WORKFLOW_STEPS.length - 1 ? (
+                    <div className="hidden md:block pt-8 text-outline-variant/30">
                       <span className="material-symbols-outlined text-5xl">trending_flat</span>
                     </div>
-                  )}
-                </>
+                  ) : null}
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* CTA */}
         <section className="py-40 px-6 relative">
           <div className="max-w-4xl mx-auto glass-panel p-16 rounded-lg border border-outline-variant/20 text-center relative overflow-hidden">
             <div className="cta-glow" />
@@ -184,18 +178,13 @@ export default function LandingPage() {
 
             <Link
               to="/new-pitch"
-              className="inline-block btn-primary text-on-primary-container px-12 py-5 rounded-xl font-bold text-xl font-headline hover:scale-105 transition-transform"
+              className="inline-block btn-primary text-on-primary-container px-12 py-5 rounded-xl font-bold text-xl font-headline"
             >
               Launch Your Success Story
             </Link>
 
             <div className="mt-16 pt-16 border-t border-outline-variant/10 grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[
-                { value: '98%',  label: 'Confidence Lift' },
-                { value: '12k+', label: 'Pitches Analyzed' },
-                { value: '24/7', label: 'Coach Availability' },
-                { value: '4.9/5', label: 'Founder Rating' },
-              ].map(({ value, label }) => (
+              {STATS.map(({ value, label }) => (
                 <div key={label}>
                   <div className="text-3xl font-black text-on-surface font-headline">{value}</div>
                   <div className="text-sm text-on-surface-variant uppercase tracking-widest mt-2">{label}</div>
@@ -204,81 +193,36 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        {/* Login Section */}
-        <section id="login" className="py-40 px-6 relative">
-          <div className="max-w-md mx-auto glass-panel p-12 rounded-lg border border-outline-variant/20 relative overflow-hidden">
-            <div className="cta-glow" />
-
-            <h2 className="text-3xl font-headline font-black mb-2 text-on-surface text-center">Welcome Back</h2>
-            <p className="text-on-surface-variant text-center mb-8">Login to your Pitchy-AI account</p>
-
-            <form className="space-y-6 relative z-10">
-              <div>
-                <label className="block text-sm font-semibold text-on-surface mb-2">Email Address</label>
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  className="w-full px-4 py-3 rounded-lg bg-surface-container border border-outline-variant/20 text-on-surface placeholder-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-on-surface mb-2">Password</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 rounded-lg bg-surface-container border border-outline-variant/20 text-on-surface placeholder-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 rounded" />
-                  <span className="text-sm text-on-surface-variant">Remember me</span>
-                </label>
-                <a href="#" className="text-sm text-primary hover:text-primary-fixed transition-colors">Forgot?</a>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 btn-primary text-on-primary-container rounded-lg font-bold font-headline hover:opacity-90 transition-all active:scale-95"
-              >
-                Sign In
-              </button>
-
-              <div className="text-center pt-4 border-t border-outline-variant/10">
-                <p className="text-on-surface-variant text-sm">
-                  Don't have an account?{' '}
-                  <Link to="/new-pitch" className="text-primary hover:text-primary-fixed font-semibold transition-colors">
-                    Sign Up
-                  </Link>
-                </p>
-              </div>
-            </form>
-          </div>
-        </section>
       </main>
 
-      {/* ── Footer ── */}
       <footer className="w-full border-t border-slate-800/50 bg-slate-900 dark:bg-slate-950">
         <div className="flex flex-col md:flex-row justify-between items-center px-8 py-12 max-w-7xl mx-auto">
           <div className="mb-8 md:mb-0">
             <div className="text-lg font-black text-slate-300 font-headline mb-2">Pitchy-AI</div>
             <p className="font-body text-xs leading-relaxed text-slate-500 max-w-xs">
-              © 2024 Pitchy-AI. Master your narrative.
+              (c) 2024 Pitchy-AI. Master your narrative.
               The premier tool for elite founder performance.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-8 justify-center items-center">
-            {['Privacy Policy', 'Terms of Service', 'Contact Support', 'Press Kit', 'Success Stories'].map(link => (
-              <a key={link} href="#" className="font-body text-xs text-slate-500 hover:text-blue-400 transition-colors">
-                {link}
-              </a>
-            ))}
+            <Link to="/dashboard" className="font-body text-xs text-slate-500 hover:text-blue-400 transition-colors">
+              Dashboard
+            </Link>
+            <Link to="/new-pitch" className="font-body text-xs text-slate-500 hover:text-blue-400 transition-colors">
+              New Pitch
+            </Link>
+            <Link to="/login" className="font-body text-xs text-slate-500 hover:text-blue-400 transition-colors">
+              Sign In
+            </Link>
+            <Link to="/signup" className="font-body text-xs text-slate-500 hover:text-blue-400 transition-colors">
+              Sign Up
+            </Link>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }
+
+export default LandingPage;
