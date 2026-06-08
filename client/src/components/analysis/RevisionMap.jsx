@@ -1,3 +1,16 @@
+/**
+ * Renders one field in a sentence-level revision item.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {string} props.label - Field label.
+ * @param {React.ReactNode} props.children - Field body.
+ * @param {string} [props.tone] - Visual tone class suffix.
+ * @param {boolean} [props.quote] - Whether to wrap body text in quotes.
+ *
+ * Returns:
+ * @returns {JSX.Element|null} Revision field, or null when children is empty.
+ */
 function RevisionField({
   label,
   children,
@@ -16,6 +29,16 @@ function RevisionField({
   );
 }
 
+/**
+ * Renders sentence-level revision suggestions from Gemini analysis.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {object[]} props.regions - Modification regions to render.
+ *
+ * Returns:
+ * @returns {JSX.Element|null} Revision map card, or null when there are no regions.
+ */
 export default function RevisionMap({ regions }) {
   if (!regions.length) return null;
 

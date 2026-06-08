@@ -15,6 +15,17 @@ import { useRecordingTimer } from "./microphone/useRecordingTimer";
 import { useWaveformVisualizer } from "./microphone/useWaveformVisualizer";
 import { logError, logWarn } from "../utils/logger";
 
+/**
+ * Manages browser microphone recording, waveform display, upload, and analysis state.
+ *
+ * Args:
+ * @param {object} [options] - Hook callbacks.
+ * @param {Function} [options.onAnalysisComplete] - Called with backend analysis data after upload succeeds.
+ * @param {Function} [options.onError] - Called with user-facing error text when recording or upload fails.
+ *
+ * Returns:
+ * @returns {object} Recording state and controls with isRecording, timeElapsed, isAnalyzing, formatTime, startRecording, stopRecording, and canvasRef.
+ */
 export function useMicrophone({ onAnalysisComplete, onError } = {}) {
   const [isRecording, setIsRecording] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);

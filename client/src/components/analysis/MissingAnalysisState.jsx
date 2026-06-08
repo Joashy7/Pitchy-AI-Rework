@@ -1,5 +1,15 @@
 import { Link } from "react-router-dom";
 
+/**
+ * Renders the temporary missing-analysis prompt.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {boolean} props.isFading - Whether the prompt is in its fade-out state.
+ *
+ * Returns:
+ * @returns {JSX.Element} Temporary missing-analysis status prompt.
+ */
 function MissingAnalysisPrompt({ isFading }) {
   return (
     <div
@@ -19,6 +29,17 @@ function MissingAnalysisPrompt({ isFading }) {
   );
 }
 
+/**
+ * Renders the fallback page shown when no pitch analysis is selected.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {boolean} props.showPrompt - Whether to show the temporary prompt.
+ * @param {boolean} props.isPromptFading - Whether the temporary prompt should fade.
+ *
+ * Returns:
+ * @returns {JSX.Element} Missing-analysis page with dashboard and new-pitch actions.
+ */
 export default function MissingAnalysisState({ showPrompt, isPromptFading }) {
   return (
     <>

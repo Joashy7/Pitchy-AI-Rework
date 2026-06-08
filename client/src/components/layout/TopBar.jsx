@@ -6,6 +6,17 @@ import { getAuthenticatedUser, logoutUser } from "../../utils/auth";
 const PROFILE_IMAGE_URL =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCEEkbMJ1oKR7lOHtujcFiuIzNc3K1uVHXipnX4-Rmtd2IXcQ0PrXPdhTjvL6zX0QvoJ64XX_0TiH-xL8XmiuCr5wooUWjk31OoG6C2n714SEQs-JR_F53Q2jZGPNlp7LISbArZLZZ5qGMTsFhaE1NX7EeScxjResy2KGnHpbMMSwgKZwH7gnWqSe0ZSlIDj3kLAvPajb2VZJie9zp8y5ud-GXDXFbyt_2rz7oPywnrlvbBvh8OeDHDuIB0k1ClJnbAWqBBi1TjVmo";
 
+/**
+ * Renders the authenticated app top bar with search, new-pitch action, and profile menu.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {string} [props.searchValue] - Current search value for dashboard pages.
+ * @param {Function} [props.onSearchChange] - Search input change handler.
+ *
+ * Returns:
+ * @returns {JSX.Element} Top navigation bar with search, new pitch button, and user controls.
+ */
 function TopBar({ searchValue, onSearchChange }) {
   const navigate = useNavigate();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);

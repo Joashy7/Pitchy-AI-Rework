@@ -67,6 +67,56 @@ globalThis.loggedClientTest("getAuthenticatedUser - malformed storage", LOCATION
   }
 });
 
+globalThis.loggedClientTest("getAuthenticatedUser - legacy session refresh", LOCATION, async () => {
+  const { localStorage, restore } = installLocalStorageMock();
+
+  try {
+    localStorage.setItem("pitchyUser", JSON.stringify({
+      token: "legacy-token",
+      userId: "user_0",
+      username: "Joashy",
+    }));
+
+    await withMockedNow(2000, async () => {
+      const { getAuthenticatedUser } = await globalThis.loadClientModule("/src/utils/auth.js");
+      const authState = getAuthenticatedUser();
+      const storedState = JSON.parse(localStorage.getItem("pitchyUser"));
+
+      assert.equal(authState.token, "legacy-token");
+      assert.equal(authState.expiresAt, 3602000);
+      assert.deepEqual(storedState, authState);
+    });
+  } finally {
+    restore();
+  }
+});
+
+globalThis.loggedClientTest("logoutUser and hasStoredAuthUser - clears browser state", LOCATION, async () => {
+  const { localStorage, restore } = installLocalStorageMock();
+
+  try {
+    const {
+      hasStoredAuthUser,
+      logoutUser,
+      saveAuthUser,
+    } = await globalThis.loadClientModule("/src/utils/auth.js");
+    saveAuthUser({
+      userId: "user_0",
+      username: "Joashy",
+    });
+    localStorage.setItem("pitchPalResults", JSON.stringify({ transcript: "old pitch" }));
+
+    assert.equal(hasStoredAuthUser(), true);
+    logoutUser();
+
+    assert.equal(hasStoredAuthUser(), false);
+    assert.equal(localStorage.getItem("pitchyUser"), null);
+    assert.equal(localStorage.getItem("pitchPalResults"), null);
+  } finally {
+    restore();
+  }
+});
+
 globalThis.loggedClientTest("refreshPitchSession - records pitch activity", LOCATION, async () => {
   const { localStorage, restore } = installLocalStorageMock();
 

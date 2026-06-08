@@ -17,6 +17,15 @@ import { saveAnalysisResult } from "../utils/analysisResults";
 import { getAuthenticatedUser, refreshPitchSession } from "../utils/auth";
 import { logError } from "../utils/logger";
 
+/**
+ * Renders the pitch recording and typed-script analysis workspace.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {JSX.Element} New pitch page with recording, script, and preparation panels.
+ */
 function NewPitch() {
   const navigate = useNavigate();
   const [statusMessage, setStatusMessage] = useState("");

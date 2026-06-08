@@ -16,6 +16,15 @@ import {
 
 const PUBLIC_PATHS = new Set(["/", "/landing", "/login", "/signup"]);
 
+/**
+ * Defines frontend routes and browser-session expiration behavior.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {JSX.Element} React Router route tree for the application.
+ */
 function App() {
   const location = useLocation();
   const navigate = useNavigate();

@@ -19,11 +19,23 @@ Pitchy-AI is a web-based pitch coaching app that lets users record or type a pit
 | Testing | Node test runner with project-specific logged test helpers |
 | Code Quality | ESLint, React Hooks lint rules |
 
+## Repository Paths
+
+| Required Item | Path |
+| --- | --- |
+| Source code directory | `client/src/` for the React frontend and `server/` for the Node/Express backend |
+| Test directory | `client/src/tests/` and `server/tests/` |
+| Test entry points | `client/unit.test.js`, `server/unit.test.js`, and the `npm run test` script |
+| Requirement specification | `config/Context/FUNCTIONALITY.md` |
+| Design and architecture guardrails | `config/Context/CONTRACT.md` |
+| AI analysis prompt/design context | `config/Context/ANALYSIS.md` |
+| Demo video | Coming soon. Add the final demo video link here after recording. |
+
 ## Setup
 
 ### Requirements
 
-- Node.js: use a current Node version compatible with ES modules and Vite. Replace with the exact supported version for your release: `1.0`.
+- Node.js: use a current LTS version compatible with ES modules and Vite.
 - npm: included with Node.js.
 - Google Cloud project with the Google Sheets API enabled.
 - Google service account JSON credentials.
@@ -37,7 +49,7 @@ Clone the project from GitHub, then move into the project folder:
 
 ```bash
 git clone <YOUR_GITHUB_REPO_URL>
-cd Pitchy-AI-Rework
+cd final-project-joashgem-marcos
 ```
 
 Replace `<YOUR_GITHUB_REPO_URL>` with the public GitHub URL for this repository.
@@ -108,7 +120,7 @@ Create a `.env` file in the project root:
 ```env
 GEMINI_API_KEY=<YOUR_GEMINI_API_KEY>
 GEMINI_MODEL=gemini-2.5-flash
-GEMINI_MODEL_FALLBACKS=gemini-3.5-flash,gemini-3.1-flash-lite,gemini-2.5-flash-lite,gemini-2.5-pro
+GEMINI_MODEL_FALLBACKS=gemini-2.5-flash-lite,gemini-2.5-pro,gemini-2.0-flash,gemini-2.0-flash-lite
 ELEVEN_API_KEY=<YOUR_ELEVENLABS_API_KEY>
 GOOGLE_SHEETS_SPREADSHEET_ID=<YOUR_GOOGLE_SHEET_ID>
 STORAGE_MODE=google
@@ -119,8 +131,10 @@ VITE_API_BASE_URL=http://localhost:3000
 `GEMINI_MODEL` is the primary model for pitch analysis. `GEMINI_MODEL_FALLBACKS` is an optional comma-separated fallback chain used when Gemini returns traffic, timeout, network, rate-limit, or temporary server errors. The default chain is:
 
 ```text
-gemini-2.5-flash -> gemini-3.5-flash -> gemini-3.1-flash-lite -> gemini-2.5-flash-lite -> gemini-2.5-pro
+gemini-2.5-flash -> gemini-2.5-flash-lite -> gemini-2.5-pro -> gemini-2.0-flash -> gemini-2.0-flash-lite
 ```
+
+Use model codes listed in the official Gemini API model documentation: https://ai.google.dev/gemini-api/docs/models/gemini. Preview models can change or be removed, so prefer stable model codes for demos and releases.
 
 Place your Google service account credentials file at the project root:
 
@@ -143,7 +157,7 @@ For an easier local demo, use local storage instead of Google Sheets:
 STORAGE_MODE=local
 GEMINI_API_KEY=<YOUR_GEMINI_API_KEY>
 GEMINI_MODEL=gemini-2.5-flash
-GEMINI_MODEL_FALLBACKS=gemini-3.5-flash,gemini-3.1-flash-lite,gemini-2.5-flash-lite,gemini-2.5-pro
+GEMINI_MODEL_FALLBACKS=gemini-2.5-flash-lite,gemini-2.5-pro,gemini-2.0-flash,gemini-2.0-flash-lite
 ELEVEN_API_KEY=<YOUR_ELEVENLABS_API_KEY>
 PORT=3000
 VITE_API_BASE_URL=http://localhost:3000

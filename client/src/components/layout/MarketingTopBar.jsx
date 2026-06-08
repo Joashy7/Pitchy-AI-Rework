@@ -2,6 +2,15 @@ import { Link } from "react-router-dom";
 
 import { getAuthenticatedUser } from "../../utils/auth";
 
+/**
+ * Renders the marketing top navigation used on public pages.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {JSX.Element} Fixed marketing navigation bar with feature links and start action.
+ */
 function MarketingTopBar() {
   const activeUser = getAuthenticatedUser();
   const startPitchingPath = activeUser ? "/new-pitch" : "/login";

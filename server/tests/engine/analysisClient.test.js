@@ -246,6 +246,34 @@ loggedTest('createAnalysisClient.analyzeWithGemini - fallback success', LOCATION
   assert.equal(analysis.summary_feedback, 'Fallback model recovered.');
 });
 
+loggedTest('createAnalysisClient.analyzeWithGemini - fallback exhaustion', LOCATION, async () => {
+  const requestedModels = [];
+  const client = createAnalysisClient({
+    getModel: (modelName) => ({
+      generateContent: async () => {
+        requestedModels.push(modelName);
+        const error = new Error(`${modelName} is overloaded`);
+        error.status = 503;
+        throw error;
+      },
+    }),
+    modelNames: ['gemini-primary', 'gemini-secondary'],
+    buildPrompt: () => 'Prompt',
+    retry: async (operation) => operation(),
+    timeout: async (promise) => promise,
+    logger: {
+      logDebug() {},
+      logInfo() {},
+    },
+  });
+
+  await assert.rejects(
+    () => client.analyzeWithGemini('Original pitch.', 10),
+    /gemini-secondary is overloaded/
+  );
+  assert.deepEqual(requestedModels, ['gemini-primary', 'gemini-secondary']);
+});
+
 loggedTest('createAnalysisClient.analyzeWithGemini - no fallback for client error', LOCATION, async () => {
   const requestedModels = [];
   const client = createAnalysisClient({

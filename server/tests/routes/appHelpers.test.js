@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   asyncRoute,
   createApp,
+  createAudioUpload,
   sendEngineError,
 } from '../../app.js';
 import { loggedTest } from '../helpers/loggedTest.js';
@@ -32,6 +33,39 @@ loggedAppHelperTest('createApp - missing engine validation', () => {
     () => createApp(),
     /createApp requires an engine instance/
   );
+});
+
+loggedAppHelperTest('createAudioUpload - MIME filter', async () => {
+  const upload = createAudioUpload({
+    allowedMimeTypes: new Set(['audio/webm']),
+  });
+  const middleware = upload.single('file');
+
+  assert.equal(typeof middleware, 'function');
+
+  await new Promise((resolve, reject) => {
+    upload.fileFilter({}, { mimetype: 'audio/webm' }, (error, accepted) => {
+      try {
+        assert.equal(error, null);
+        assert.equal(accepted, true);
+        resolve();
+      } catch (assertionError) {
+        reject(assertionError);
+      }
+    });
+  });
+
+  await new Promise((resolve, reject) => {
+    upload.fileFilter({}, { mimetype: 'text/plain' }, (error) => {
+      try {
+        assert.equal(error.statusCode, 400);
+        assert.match(error.message, /Unsupported audio file type/);
+        resolve();
+      } catch (assertionError) {
+        reject(assertionError);
+      }
+    });
+  });
 });
 
 loggedAppHelperTest('sendEngineError - fallback message', () => {

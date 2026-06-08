@@ -38,6 +38,15 @@ const PITCH_ARC_SEGMENTS = [
   },
 ];
 
+/**
+ * Renders static pitch preparation tips and a pitch arc guide.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {JSX.Element} Pitch preparation sidebar with checklist and arc visualization.
+ */
 export default function PitchPrepSidebar() {
   return (
     <div className="bento-sidebar">

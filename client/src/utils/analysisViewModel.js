@@ -4,6 +4,15 @@ import {
   TEXT_SCORE_ANALYSIS_MESSAGE,
 } from "../constants/messages";
 
+/**
+ * Converts a score value into a safe display score.
+ *
+ * Args:
+ * @param {unknown} value - Raw score value from API or storage.
+ *
+ * Returns:
+ * @returns {number} Integer score from 0 to 100; returns 0 for non-numeric values.
+ */
 export const getSafeScore = (value) => {
   const score = Number(value);
   if (!Number.isFinite(score)) return 0;
@@ -11,8 +20,26 @@ export const getSafeScore = (value) => {
   return Math.min(100, Math.max(0, Math.round(score)));
 };
 
+/**
+ * Normalizes feedback items into an array.
+ *
+ * Args:
+ * @param {unknown} items - Raw feedback item list.
+ *
+ * Returns:
+ * @returns {unknown[]} Original array when items is an array; otherwise an empty array.
+ */
 export const getFeedbackItems = (items) => (Array.isArray(items) ? items : []);
 
+/**
+ * Builds revision regions for the analysis page from current or legacy analysis fields.
+ *
+ * Args:
+ * @param {object|null|undefined} analysisData - Raw analysis data from API or storage.
+ *
+ * Returns:
+ * @returns {object[]} Modification region objects with timestamp, section, original, issue, suggested_edit, and reason fields.
+ */
 export const getModificationRegions = (analysisData) => {
   if (Array.isArray(analysisData?.modification_regions)) {
     const regions = analysisData.modification_regions
@@ -55,6 +82,15 @@ export const getModificationRegions = (analysisData) => {
   }));
 };
 
+/**
+ * Converts raw analysis data into the analysis page view model.
+ *
+ * Args:
+ * @param {object|null|undefined} data - Raw analysis data from localStorage, backend response, or dashboard selection.
+ *
+ * Returns:
+ * @returns {object|null} Analysis view model for rendering; null when data is missing.
+ */
 export const toAnalysisViewModel = (data) => {
   if (!data) return null;
 

@@ -1,5 +1,14 @@
 import { Link } from "react-router-dom";
 
+/**
+ * Maps a status label to its pitch history CSS class.
+ *
+ * Args:
+ * @param {string} status - Pitch status label.
+ *
+ * Returns:
+ * @returns {string} CSS class for recorded, text-only, or default status styles.
+ */
 const getStatusClassName = (status) => {
   if (status === "Recorded") return "pitch-history__status--recorded";
   if (status === "Text Only") return "pitch-history__status--text";
@@ -7,6 +16,17 @@ const getStatusClassName = (status) => {
   return "pitch-history__status--default";
 };
 
+/**
+ * Renders a table row used for loading, empty, or error states.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {React.ReactNode} props.children - Row message content.
+ * @param {string} [props.tone] - Visual tone such as "default" or "error".
+ *
+ * Returns:
+ * @returns {JSX.Element} Full-width pitch history table row.
+ */
 function EmptyTableRow({ children, tone = "default" }) {
   const toneClass = tone === "error" ? "pitch-history__empty--error" : "";
 
@@ -19,6 +39,19 @@ function EmptyTableRow({ children, tone = "default" }) {
   );
 }
 
+/**
+ * Renders a dashboard pagination button.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {React.ReactNode} props.children - Button label.
+ * @param {boolean} props.disabled - Whether the button is disabled.
+ * @param {boolean} props.isActive - Whether the button represents the current page.
+ * @param {Function} props.onClick - Click handler.
+ *
+ * Returns:
+ * @returns {JSX.Element} Pagination button.
+ */
 function PaginationButton({ children, disabled, isActive, onClick }) {
   return (
     <button
@@ -32,6 +65,17 @@ function PaginationButton({ children, disabled, isActive, onClick }) {
   );
 }
 
+/**
+ * Renders one pitch history table row.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {object} props.pitch - Dashboard pitch row.
+ * @param {Function} props.onViewAnalysis - Called before navigating to the analysis page.
+ *
+ * Returns:
+ * @returns {JSX.Element} Pitch history row with analysis link.
+ */
 function PitchRow({ pitch, onViewAnalysis }) {
   const statusLabel = pitch.score_analysis_available ? "Recorded" : "Text Only";
 
@@ -72,6 +116,28 @@ function PitchRow({ pitch, onViewAnalysis }) {
   );
 }
 
+/**
+ * Renders dashboard pitch history with loading, empty, error, rows, and pagination states.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {object[]} props.pitches - Current page of pitch rows.
+ * @param {boolean} props.isLoading - Whether dashboard data is loading.
+ * @param {string} props.error - Dashboard error message.
+ * @param {number} props.currentPage - Current page number.
+ * @param {number} props.totalPages - Total page count.
+ * @param {number[]} props.visiblePages - Page buttons to render.
+ * @param {number} props.showingStart - First visible item index.
+ * @param {number} props.showingEnd - Last visible item index.
+ * @param {number} props.totalItems - Total filtered pitch count.
+ * @param {Function} props.onPageChange - Page number click handler.
+ * @param {Function} props.onPreviousPage - Previous page handler.
+ * @param {Function} props.onNextPage - Next page handler.
+ * @param {Function} props.onViewAnalysis - Analysis selection handler.
+ *
+ * Returns:
+ * @returns {JSX.Element} Pitch history table and pagination.
+ */
 export default function PitchHistoryTable({
   pitches,
   isLoading,

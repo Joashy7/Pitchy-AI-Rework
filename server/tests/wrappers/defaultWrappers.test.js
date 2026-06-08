@@ -162,6 +162,30 @@ loggedTest({
         () => sheetsClient.initializeAuth(),
         /ENOENT/
       );
+      await assert.rejects(
+        () => sheetsClient.getSheetsApi(),
+        /ENOENT/
+      );
+      await assert.rejects(
+        () => sheetsClient.updateSheet('sheet_wrapper_test', 'Users!A1', ['value']),
+        /ENOENT/
+      );
+      await assert.rejects(
+        () => sheetsClient.appendToSheet('sheet_wrapper_test', 'Users!A:E', ['value']),
+        /ENOENT/
+      );
+      await assert.rejects(
+        () => sheetsClient.getSheetValues('sheet_wrapper_test', 'Users!A:E'),
+        /ENOENT/
+      );
+      await assert.rejects(
+        () => sheetsClient.ensureSheet('sheet_wrapper_test', 'Users', ['user_id']),
+        /ENOENT/
+      );
+      await assert.rejects(
+        () => sheetsClient.findRowByValue('sheet_wrapper_test', 'Users', 'A', 'user_0'),
+        /ENOENT/
+      );
     `, {
       GOOGLE_SERVICE_ACCOUNT_PATH: join(storagePath, 'missing-service-account.json'),
       GOOGLE_SHEETS_SPREADSHEET_ID: 'sheet_wrapper_test',

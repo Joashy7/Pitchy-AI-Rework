@@ -169,7 +169,7 @@ export const createLocalSheetsClient = ({
    * None.
    *
    * Returns:
-   * @returns {Promise<object>} Local store object with a sheets property; rejects for non-missing file read or JSON parse errors.
+   * @returns {Promise<object>} Local store object with a sheets property; creates an empty store when the file is missing or contains malformed JSON, and rejects for other read errors.
    */
   const loadStore = async () => {
     if (store) return store;
@@ -177,7 +177,10 @@ export const createLocalSheetsClient = ({
     try {
       store = JSON.parse(await readFile(storagePath, 'utf8'));
     } catch (error) {
-      if (error.code !== 'ENOENT') throw error;
+      if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error;
+      if (error instanceof SyntaxError) {
+        logger.logInfo(`Local demo storage at ${storagePath} was malformed; resetting it.`);
+      }
       store = createEmptyStore();
     }
 

@@ -1,5 +1,16 @@
 const SCORE_RING_CIRCUMFERENCE = 282.7;
 
+/**
+ * Renders one score metric bar.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {string} props.label - Metric label.
+ * @param {number} props.value - Metric score from 0 to 100.
+ *
+ * Returns:
+ * @returns {JSX.Element} Score metric bar.
+ */
 const MetricBar = ({ label, value }) => (
   <div className="metric-bar">
     <div className="metric-bar__header">
@@ -16,6 +27,16 @@ const MetricBar = ({ label, value }) => (
   </div>
 );
 
+/**
+ * Renders score summary and metric bars for audio analysis.
+ *
+ * Args:
+ * @param {object} props - Component props.
+ * @param {object} props.scores - Score object with clarity, persuasiveness, confidence, narrativeFlow, and overall values.
+ *
+ * Returns:
+ * @returns {JSX.Element} Score overview card set.
+ */
 export default function ScoreOverview({ scores }) {
   const strokeDashoffset =
     SCORE_RING_CIRCUMFERENCE - (scores.overall / 100) * SCORE_RING_CIRCUMFERENCE;

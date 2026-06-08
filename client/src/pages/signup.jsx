@@ -7,6 +7,15 @@ import { FAILED_ACCOUNT_CREATE } from "../constants/messages";
 import { signup } from "../lib/api";
 import { saveAuthUser } from "../utils/auth";
 
+/**
+ * Renders the signup page and saves browser auth state after account creation.
+ *
+ * Args:
+ * None.
+ *
+ * Returns:
+ * @returns {JSX.Element} Signup page with marketing top bar and account creation form.
+ */
 export default function SignupPage() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
