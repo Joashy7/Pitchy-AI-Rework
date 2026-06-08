@@ -1,157 +1,68 @@
-import { useState, useRef, useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 
-export function useMicrophone() {
+import { analyzeRecordedAudio } from "./microphone/audioAnalysis";
+import { COULD_NOT_CONNECT_TO_SERVER } from "../constants/messages";
+import {
+  createAudioBlob,
+  createPitchMediaRecorder,
+  stopStreamTracks,
+} from "./microphone/mediaRecorder";
+import {
+  getRecordingErrorMessage,
+  getUnsupportedRecordingMessage,
+} from "./microphone/recordingErrors";
+import { useRecordingTimer } from "./microphone/useRecordingTimer";
+import { useWaveformVisualizer } from "./microphone/useWaveformVisualizer";
+import { logError, logWarn } from "../utils/logger";
+
+export function useMicrophone({ onAnalysisComplete, onError } = {}) {
   const [isRecording, setIsRecording] = useState(false);
-  const [timeElapsed, setTimeElapsed] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
-  const timerIntervalRef = useRef(null);
-  const audioCtxRef = useRef(null);
-  const analyserRef = useRef(null);
-  const micSourceRef = useRef(null);
-  const animFrameIdRef = useRef(null);
   const streamRef = useRef(null);
-  const canvasRef = useRef(null);
+  const {
+    timeElapsed,
+    formatTime,
+    startTimer,
+    stopTimer,
+  } = useRecordingTimer();
+  const {
+    canvasRef,
+    startWaveform,
+    stopWaveform,
+  } = useWaveformVisualizer();
 
-  const formatTime = (s) => {
-    const m = Math.floor(s / 60)
-      .toString()
-      .padStart(2, "0");
-    const sec = (s % 60).toString().padStart(2, "0");
-    return `${m}:${sec}`;
-  };
-
-  const startTimer = useCallback(() => {
-    setTimeElapsed(0);
-    timerIntervalRef.current = setInterval(() => {
-      setTimeElapsed((prev) => prev + 1);
-    }, 1000);
-  }, []);
-
-  const stopTimer = useCallback(() => {
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-      timerIntervalRef.current = null;
-    }
-  }, []);
-
-  const startWaveform = useCallback((stream) => {
-    if (!canvasRef.current) return;
-
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 256;
-
-    const micSource = audioCtx.createMediaStreamSource(stream);
-    micSource.connect(analyser);
-
-    audioCtxRef.current = audioCtx;
-    analyserRef.current = analyser;
-    micSourceRef.current = micSource;
-
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    const ctx = canvasRef.current.getContext("2d");
-    if (!ctx) return;
-
-    const draw = () => {
-      animFrameIdRef.current = requestAnimationFrame(draw);
-
-      const W = canvasRef.current.clientWidth;
-      const H = canvasRef.current.clientHeight;
-
-      if (!W || !H) return;
-
-      if (canvasRef.current.width !== W || canvasRef.current.height !== H) {
-        canvasRef.current.width = W;
-        canvasRef.current.height = H;
-      }
-
-      analyser.getByteFrequencyData(dataArray);
-      ctx.clearRect(0, 0, W, H);
-
-      const barCount = 48;
-      const step = Math.floor(bufferLength / barCount);
-      const gap = 4;
-      const barW = (W - gap * (barCount - 1)) / barCount;
-
-      for (let i = 0; i < barCount; i++) {
-        const value = dataArray[i * step] / 255;
-        const barH = Math.max(4, value * H * 0.9);
-        const x = i * (barW + gap);
-        const y = (H - barH) / 2;
-
-        const alpha = 0.35 + value * 0.65;
-        ctx.fillStyle = `rgba(60, 144, 255, ${alpha})`;
-
-        if (typeof ctx.roundRect === "function") {
-          ctx.beginPath();
-          ctx.roundRect(x, y, barW, barH, barW / 2);
-          ctx.fill();
-        } else {
-          ctx.fillRect(x, y, barW, barH);
-        }
-      }
-    };
-
-    draw();
-  }, []);
-
-  const stopWaveform = useCallback(() => {
-    if (animFrameIdRef.current) {
-      cancelAnimationFrame(animFrameIdRef.current);
-      animFrameIdRef.current = null;
-    }
-
-    if (audioCtxRef.current) {
-      audioCtxRef.current.close();
-      audioCtxRef.current = null;
-      analyserRef.current = null;
-      micSourceRef.current = null;
-    }
-
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext("2d");
-      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    }
-  }, []);
+  const cleanupRecording = useCallback(() => {
+    stopTimer();
+    stopWaveform();
+    stopStreamTracks(streamRef.current);
+    streamRef.current = null;
+    mediaRecorderRef.current = null;
+    setIsRecording(false);
+  }, [stopTimer, stopWaveform]);
 
   const sendAudio = useCallback(
     async (audioBlob) => {
       setIsAnalyzing(true);
+
       try {
-        const formData = new FormData();
-        formData.append("file", audioBlob, "recording.webm");
-
-        const res = await fetch("http://localhost:3000/analyze", {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || "Analysis failed");
-        }
-
-        localStorage.setItem("pitchPalResults", JSON.stringify(data));
-        window.location.href = "/analysis";
+        const data = await analyzeRecordedAudio(audioBlob);
+        onAnalysisComplete?.(data);
       } catch (error) {
-        console.error("sendAudio error:", error);
-        alert(error.message || "Could not connect to server");
+        logError("sendAudio error:", error);
+        onError?.(error.message || COULD_NOT_CONNECT_TO_SERVER);
       } finally {
         setIsAnalyzing(false);
       }
     },
-    []
+    [onAnalysisComplete, onError]
   );
 
   const startRecording = useCallback(async () => {
     try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("Your browser does not support audio recording. Please use Chrome, Firefox, Edge, or Safari.");
+      if (!navigator.mediaDevices?.getUserMedia) {
+        onError?.(getUnsupportedRecordingMessage());
         return;
       }
 
@@ -160,70 +71,56 @@ export function useMicrophone() {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
-        }
+        },
       });
       streamRef.current = stream;
-
-      const mediaRecorder = new MediaRecorder(stream);
       audioChunksRef.current = [];
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) audioChunksRef.current.push(event.data);
-      };
+      const mediaRecorder = createPitchMediaRecorder(stream, {
+        onChunk: (audioChunk) => {
+          audioChunksRef.current.push(audioChunk);
+        },
+        onStop: async () => {
+          const audioBlob = createAudioBlob(audioChunksRef.current);
 
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach((t) => t.stop());
-
-        stopTimer();
-        stopWaveform();
-        setIsRecording(false);
-
-        const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/webm",
-        });
-        await sendAudio(audioBlob);
-      };
-
-      mediaRecorder.onerror = (event) => {
-        console.error("MediaRecorder error:", event.error);
-      };
+          cleanupRecording();
+          await sendAudio(audioBlob);
+        },
+        onError: (event) => {
+          logError("MediaRecorder error:", event.error);
+        },
+      });
 
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start(250);
       setIsRecording(true);
-
       startTimer();
+
       requestAnimationFrame(() => {
         try {
           startWaveform(stream);
         } catch (waveformError) {
-          console.warn("Waveform visualization unavailable:", waveformError);
+          logWarn("Waveform visualization unavailable:", waveformError);
         }
       });
     } catch (error) {
-      console.error("Recording start error:", error);
-      stopTimer();
-      stopWaveform();
-      setIsRecording(false);
-      streamRef.current?.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-
-      let errorMessage = "Could not access microphone";
-      if (error.name === "NotAllowedError") {
-        errorMessage = "Microphone permission denied. Please allow microphone access in your browser settings.";
-      } else if (error.name === "NotFoundError") {
-        errorMessage = "No microphone found. Please connect a microphone and try again.";
-      } else if (error.name === "NotReadableError") {
-        errorMessage = "Microphone is in use by another application. Please close other apps using your microphone.";
-      }
-
-      alert(errorMessage);
+      logError("Recording start error:", error);
+      cleanupRecording();
+      onError?.(getRecordingErrorMessage(error));
     }
-  }, [startTimer, startWaveform, stopTimer, stopWaveform, sendAudio]);
+  }, [
+    cleanupRecording,
+    onError,
+    sendAudio,
+    startTimer,
+    startWaveform,
+  ]);
 
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-      mediaRecorderRef.current.stop();
+    const mediaRecorder = mediaRecorderRef.current;
+
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
     }
   }, []);
 
